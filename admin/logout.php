@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../app_bootstrap.php';unset($_SESSION['admin_id'],$_SESSION['admin_name'],$_SESSION['admin_email'],$_SESSION['admin_role']);session_regenerate_id(true);$_SESSION['flash']='You have signed out of the admin portal.';header('Location:login.php');exit;

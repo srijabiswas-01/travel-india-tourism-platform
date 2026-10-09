@@ -1,0 +1,10 @@
+<?php $adminNotifications=$adminNotifications??[];$adminNotificationUnread=$adminNotificationUnread??0; ?>
+<div class="admin-notification-menu">
+ <button class="admin-notification-toggle" type="button" aria-label="Open admin notifications" aria-expanded="false" title="Notifications"><i class="fa-solid fa-bell" aria-hidden="true"></i><?php if($adminNotificationUnread):?><span><?php echo min(99,$adminNotificationUnread);?></span><?php endif;?></button>
+ <section class="admin-notification-panel" hidden>
+  <div class="admin-notification-head"><strong>Admin notifications</strong><?php if($adminNotificationUnread):?><form method="post" action="notification-read.php"><?php echo csrf_input();?><input type="hidden" name="action" value="all"><input type="hidden" name="return" value="<?php echo e(basename($_SERVER['PHP_SELF']));?>"><button type="submit">Mark all read</button></form><?php endif;?></div>
+  <div class="admin-notification-list"><?php if(!$adminNotifications):?><p class="admin-notification-empty">No new admin notifications</p><?php endif;?>
+   <?php foreach($adminNotifications as $notice):$target=notification_link($notice['link']??null,'index.php');?><form method="post" action="notification-read.php" class="admin-notification-item <?php echo empty($notice['read_at'])?'is-unread':'';?>"><?php echo csrf_input();?><input type="hidden" name="id" value="<?php echo (int)$notice['id'];?>"><input type="hidden" name="return" value="<?php echo e($target);?>"><button type="submit"><i class="fa-solid <?php echo $notice['type']==='warning'?'fa-triangle-exclamation':($notice['type']==='success'?'fa-circle-check':'fa-circle-info');?>" aria-hidden="true"></i><span><strong><?php echo e($notice['title']);?></strong><small><?php echo e($notice['message']);?></small><time><?php echo e(date('d M Y, h:i A',strtotime($notice['created_at'])));?></time></span></button></form><?php endforeach;?>
+  </div>
+ </section>
+</div>

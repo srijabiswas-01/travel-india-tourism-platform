@@ -1,0 +1,51 @@
+# Local configuration and secrets
+config.local.php
+config.*.local.php
+.env
+.env.*
+!.env.example
+
+# Runtime uploads (the application recreates directories when needed)
+/uploads/**
+
+# Local database exports; keep versioned schema/migrations under db/
+/*.sql
+*.sql.gz
+*.sql.zip
+
+# Logs, caches, sessions, and temporary files
+*.log
+/logs/
+/cache/
+/tmp/
+/temp/
+*.tmp
+*.cache
+*.pid
+
+# Dependency and test output
+/vendor/
+/coverage/
+/.phpunit.cache/
+.phpunit.result.cache
+
+# IDE and local tooling
+/.vscode/
+/.idea/
+/.codex/
+*.code-workspace
+*.suo
+*.user
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Deployment archives and backups
+*.zip
+*.tar
+*.tar.gz
+*.bak
+*.backup
+*~

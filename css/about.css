@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Allura&family=Beau+Rivage&family=Charm:wght@700&family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Merienda:wght@400;700&family=Monoton&family=Oleo+Script&family=Rubik+Moonrocks&display=swap');
+*{
+    padding:0;
+    margin: 0;
+    font-family: 'Josefin Sans', sans-serif;
+    box-sizing: border-box;
+}
+body{
+    background: #DEB431;
+}
+.about{
+    width: 100%;
+    padding: 8px 0px;
+}
+
+.about text{
+    width: 550px;
+    padding-left: 30em;
+    text-align: centerjustify;
+}
+
+.about h1{
+    color: rgb(0, 0, 0);
+    font-size: 40px;
+    text-transform: capitalize;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    padding-right: 2em;
+}
+.about p{
+    background: linear-gradient(90deg, #4c1064, #693080, #785f81);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: rgba(8, 7, 7, 0.8);
+    letter-spacing: 1px;
+    line-height: 20px;
+    font-size: 18px;
+    margin-bottom: 45px;
+    text-align: justify;
+    padding-top: 2em;
+    font-family: 'Oleo Script', cursive;
+}
+.about .tag{
+    font-size: 45px;
+}
+.main{
+    width: 1130px;
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.hi-slide h4{
+    color: rgb(255, 255, 255);
+    font-size: 32px;
+    text-transform: capitalize;
+    margin-bottom: 25px;
+    letter-spacing: 10px;
+    text-align: center;
+    position: relative;
+    text-transform: uppercase;
+    width: 100%;
+    top: -5%;
+   
+}
+.hi-slide{
+    background-color: rgb(11, 55, 97);
+    position: relative;
+    width: 754px;
+    height: 292px;
+    border-radius: 50px;
+    margin: 115px auto;
+}
+
+.hi-slide .hi-next,
+.hi-slide .hi-prev{
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    border-radius: 50px;
+    line-height: 40px;
+    text-align: center;
+    cursor: pointer;
+    background-color: whitesmoke;
+    color: black;
+    transition: all 0.7s;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.hi-slide .hi-next:hover,
+.hi-slide .hi-prev:hover{
+    opacity: 1;
+    background-color: rgb(145, 207, 45);
+}
+
+.hi-slide .hi-prev{ left: -80px;}
+
+.hi-slide .hi-prev::before{
+    content: '<';
+}
+
+.hi-slide .hi-next{
+    right: -80px;
+}
+
+.hi-slide .hi-next::before{
+    content: '>';
+}
+
+.hi-slide > ul{
+    list-style: none;
+    position: relative;
+    width: 754px;
+    height: 292px;
+    margin: 0;
+    padding: 0;
+}
+
+
+.hi-slide > ul > li{
+    overflow: hidden;
+    position: absolute;
+    z-index: 0;
+    left: 377px;
+    top: 147px;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: 3px solid whitesmoke;
+    cursor: pointer;
+    background-color: #333;
+}
+
+.hi-slide > ul > li > img{
+    width: 100%;
+    height: 100%;
+    background-position: center;
+}
+
+
+@import url('https://fonts.googleapis.com/css?family=Allura|Josefin+Sans');
+
+.wrapper{
+  margin-top: 10%;
+}
+
+.wrapper h1{
+  font-family: 'Allura', cursive;
+  font-size: 50px;
+  margin-bottom: 60px;
+  text-align: center;
+  color: #fff;
+ 
+}
+
+.wrapper h1:nth-child(1)
+{
+    color: transparent;
+    -webkit-text-stroke: 2px #074547;
+}
+
+
+@keyframes animate
+{
+    0%,100%
+    {
+        clip-path: polygon(0% 45%, 15% 44%, 32% 50%, 54% 60%, 70% 61%, 84% 59%, 100% 52%, 100% 100%, 0% 100%);
+    }
+
+}
+
+.team{
+  display: flex;
+  justify-content: center;
+  width: auto;
+  text-align: center;
+  flex-wrap: wrap;
+}
+
+.team .team_member{
+  background: #fff;
+  margin: 5px;
+  margin-bottom: 50px;
+  height: 150px;
+  width: 200px;
+  padding: 20px;
+  line-height: 20px;
+  color: #8e8b8b;  
+  position: relative;
+}
+
+.team .team_member h3{
+  color: #81c644;
+  font-size: 20px;
+  margin-top: 50px;
+}
+
+.team .team_member p.role{
+  background: linear-gradient(90deg, #644210, #7b8030, #7b815f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 12px 0;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.team .team_member .team_img{
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 100%;
+    background: rgb(255, 255, 255);
+  }
+
+.team .team_member .team_img img{
+  width: 100px;
+  height: 100px;
+  padding: 5px;
+  border-radius: 80px;
+}
+

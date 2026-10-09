@@ -1,0 +1,187 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Allura&family=Beau+Rivage&family=Charm:wght@700&family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Merienda&family=Monoton&family=Rubik+Moonrocks&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "poppings", sans-serif;
+  box-sizing: border-box;
+}
+body{
+  background: black;
+}
+.header {
+  height: 70vh;
+  width: 100%;
+  padding: 0 8%;
+  position: relative;
+}
+.content {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 90%;
+  max-width: 900px;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #ff3d00;
+  padding-top: 50px;
+}
+.content h1{
+  font-size: 90px;
+  font-weight: 600;
+  margin-bottom: 50px;
+  font-family: 'Charm', cursive;
+  border: none;
+  background: #ff7300; /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #ff7300, #1aae0f); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #ff7300, #1aae0f); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+}
+
+
+.back-vedio {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -100;
+}
+
+@media(min-aspect-ratio: 16/9) {
+  .back-vedio {
+      width: 100%;
+      height: auto;
+  }
+}
+
+@media(max-aspect-ratio:16/9) {
+  .back-vedio {
+      width: auto;
+      height: 100%;
+  }
+}
+main{
+  margin-left: 70px;
+}
+ .heading h1{
+  text-align: center;
+  border: double black;
+  font-family: 'Rubik Moonrocks', cursive;
+  background: #101BB8;
+background: -webkit-linear-gradient(to right, #101BB8 0%, #268BFF 100%);
+background: -moz-linear-gradient(to right, #101BB8 0%, #268BFF 100%);
+background: linear-gradient(to right, #101BB8 0%, #268BFF 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+
+
+}
+.box{
+  display: block;
+  margin-top: 40px;
+  text-align: center;
+  float: left;
+  width: 20%;
+  padding: 5px;
+  padding-left: 12px;
+  box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.2), 0 0px 0px 0 rgba(0, 0, 0,0.19);
+}
+.box:hover{
+  transform: scale(1.5);
+  transition: 1s transform;
+}
+.img{
+  width: 200px;
+  height: 150px;
+  border-radius: 12px;  
+}
+.text{
+  text-decoration: none;
+  font-size: 15px;
+  color: #fff;
+}
+.space {
+  min-height: 1rem;
+}
+ 
+.service-section {
+  background: url(../image/service-background.jpg);
+  background-size: cover;
+  padding: 60px 0;
+}
+
+.inner-width {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+  overflow: hidden;
+}
+
+.section-title {
+  text-align: center;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 30px;
+  font-family: 'Merienda', cursive;
+}
+
+.border {
+  width: 160px;
+  height: 2px;
+  background: #2F86A6;
+  margin: 20px auto;
+}
+
+.service-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.service-box {
+  max-width: 33.33%;
+  padding: 10px;
+  text-align: center;
+  color: #ddd;
+  cursor: pointer;
+}
+
+.service-icon {
+  display: inline-block;
+  width: 70px;
+  height: 70px;
+  border: 3px solid #82ccdd;
+  color: #82ccdd;
+  transform: rotate(45deg);
+  margin-bottom: 30px;
+  margin-top: 16px;
+  transition: 0.3s linear;
+}
+
+.service-icon i {
+  line-height: 70px;
+  transform: rotate(-45deg);
+  font-size: 28px;
+}
+
+.service-box:hover .service-icon {
+  background: #82ccdd;
+  color: #ddd;
+}
+
+.service-title {
+  font-size: 18px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.service-desc {
+  font-size: 14px;
+}

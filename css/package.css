@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Allura&family=Beau+Rivage&family=Charm:wght@700&family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Merienda:wght@400;700&family=Monoton&family=Rubik+Moonrocks&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "poppings", sans-serif;
+    box-sizing: border-box;
+  }
+  body{
+    background: black;
+  }
+.feature{
+    height: 20vh;
+    background: black;
+}
+
+.heading{
+    color: grey;
+    font-size: 3.5rem;
+    padding: 1rem;
+    padding-top: 4rem;
+    text-align: center;
+    letter-spacing: .2rem;
+    font-family: 'Merienda', cursive;
+}
+
+.heading span{
+    color:#ff004d;
+    font-size: 4.5rem;
+    font-family: 'Cinzel', serif;
+}
+
+.feature .card-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.feature .card-container .card{
+    width: 25rem;
+    margin: 2rem;
+    background: #fff;
+    border-radius: .5rem;
+    box-shadow: 0 .3rem .5rem rgba(0, 0, 0, .3);
+    overflow: hidden;
+    position: relative;
+}
+
+.feature .card-container .card img{
+    height: 19rem;
+    width: 100%;
+    object-fit: cover;
+}
+
+.feature .card-container .content{
+    padding-bottom: 2rem;
+    text-align: center;
+}
+
+.feature .card-container .content .title{
+    color: #0098a1;
+    font-size: 2rem;
+    font-family: 'Cinzel Decorative', cursive;
+}
+
+.feature .card-container .content p{
+    color: #333;
+    font-size: 1.2rem;
+    padding: .5rem;
+    font-family: 'Merienda', cursive;
+}
+
+.feature .card-container .content .stars i{
+   padding: 0 .2rem;
+   font-size: 2rem;
+   color: gold;
+}
+.checked {
+    color: orange;
+  }
+
+.feature .card-container .content .btn{
+    font-size: 1.5rem;
+    margin-top: 1.4rem;
+    height: 3.5rem;
+    width: 11rem;
+    border-radius: .5rem;
+    outline: none;
+    border: none;
+    background: #0098a1;
+    color: #fff;
+    cursor: pointer;
+    transition: .2s linear;
+}
+
+.feature .card-container .content .btn:hover{
+    background: none;
+    border: .2rem solid #0098a1;
+    color: #0098a1;
+}
+
+.feature .card-container .card .price{
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: block;
+    height: 2.5rem;
+    width: 5.5rem;
+    background: #ff3300;
+    color: #fff;
+    line-height: 3rem;
+    text-align: center;
+    font-size: 18px;
+}
+.feature .card-container .card .price small{display:block;font-size:.7rem;line-height:1;text-decoration:line-through;opacity:.8}.package-offer{display:inline-block;margin-bottom:8px;padding:5px 8px;border-radius:4px;background:#fff0d9;color:#8b4f0b;font-size:.72rem;font-weight:800;text-decoration:none}
+
+/* Isolated catalog layout avoids collisions with Bootstrap's generic card rules. */
+.package-page .feature { min-height:calc(100vh - 64px); height:auto; padding:0 20px 64px; }
+.package-page .package-grid { width:min(1240px,100%); margin:0 auto; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch; gap:28px; }
+.package-page .package-grid .package-card { width:100%!important; min-width:0; height:auto; margin:0!important; display:flex; flex-direction:column; overflow:hidden; position:relative; border:1px solid var(--border,#d8e0e2); border-radius:8px; background:var(--surface,#fff); }
+.package-page .package-grid .package-card-image { display:block; width:100%!important; height:auto!important; aspect-ratio:16/9; object-fit:cover; }
+.package-page .package-grid .package-price { position:absolute!important; z-index:2; top:12px!important; left:12px!important; right:auto!important; width:auto!important; min-width:0; height:auto!important; padding:8px 11px!important; display:inline-flex!important; align-items:baseline; gap:7px; line-height:1!important; white-space:nowrap; }
+.package-page .package-grid .package-price small { display:inline!important; margin:0; }
+.package-page .package-grid .content { min-height:330px; padding:22px 20px 26px!important; display:flex; flex:1; flex-direction:column; text-align:left; }
+.package-page .package-grid .package-offer { position:static; align-self:flex-start; margin:0 0 12px!important; padding:6px 9px; line-height:1.3; }
+.package-page .package-grid .title { margin:0 0 8px!important; line-height:1.12; }
+.package-page .package-grid .content .btn { width:100%; min-height:44px; height:auto; margin-top:auto; display:inline-flex; align-items:center; justify-content:center; }
+@media(max-width:980px){.package-page .package-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.package-page .feature{padding-inline:14px}.package-page .package-grid{grid-template-columns:1fr;gap:18px}.package-page .package-grid .content{min-height:0}}
