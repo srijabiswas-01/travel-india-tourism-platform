@@ -4,8 +4,16 @@ Travel India is an academic travel-management information system built with PHP 
 
 > **Payment note:** the checkout is a clearly labelled training flow. It records simulated success, failure, and cancellation outcomes, but it does not connect to a payment provider, collect or store card/UPI credentials, or move money.
 
+## Live portals
+
+- **Public website:** [https://travelindiaguide.infinityfreeapp.com/main.php](https://travelindiaguide.infinityfreeapp.com/main.php)
+- **Admin login:** [https://travelindiaguide.infinityfreeapp.com/admin/login.php](https://travelindiaguide.infinityfreeapp.com/admin/login.php)
+
+Admin access requires an authorized administrator account. Do not publish administrator credentials in this README or the GitHub repository.
+
 ## Contents
 
+- [Live portals](#live-portals)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Local installation](#local-installation)
@@ -16,6 +24,9 @@ Travel India is an academic travel-management information system built with PHP 
 - [Admin portal](#admin-portal)
 - [Notifications](#notifications)
 - [Database](#database)
+- [Testing](#testing)
+- [InfinityFree deployment](#infinityfree-deployment)
+- [GitHub guidance](#github-guidance)
 - [Security and limitations](#security-and-limitations)
 - [Verification](#verification)
 - [Project layout](#project-layout)
@@ -27,6 +38,8 @@ Travel India is an academic travel-management information system built with PHP 
 - Booking requests with dates, travellers, hotel selection, package offers, PWD support details, and special requests.
 - Standard hotel included in package price; other hotel categories can have an admin-configured per-traveller, per-trip surcharge.
 - My Trips page with booking status, trip details, itemized price summary, admin updates, and paid invoices.
+- Booking-overlap warnings, confirmed-trip conflict protection, date-amendment requests, and cancellation/refund workflows.
+- Traveller age categories, child and senior pricing, medical information, and optional PWD assistance details.
 - Public, customer-targeted, and admin-team in-app notifications with read tracking.
 - Admin dashboards and modules for packages, destinations/regions, hotels, transport, offers, bookings, customers, messages, reports, notifications, and admin accounts.
 - Light/dark themes in the customer site and admin portal.
@@ -36,7 +49,7 @@ Travel India is an academic travel-management information system built with PHP 
 
 - PHP 8.2 or later (PHP 8.4 is used for development).
 - MySQL 8 or a compatible MySQL/MariaDB server.
-- PHP extensions: `mysqli` and `fileinfo`.
+- Required PHP extension: `mysqli`. The `fileinfo` extension is recommended; image validation falls back to `getimagesize()` when it is unavailable.
 - JavaScript enabled in the browser. The site loads Bootstrap, Font Awesome, jQuery, and the QR renderer from CDNs, so internet access is needed for those assets.
 - A web server or PHP's built-in development server.
 
@@ -106,26 +119,31 @@ php -S 127.0.0.1:8000
 
 Alternatively, copy `config.local.example.php` to `config.local.php` and enter your local connection settings there. `config.local.php` takes precedence over environment values in this project; do not commit or share it. Use a restricted database user, not `root`, for a hosted deployment.
 
-The root `.htaccess` provides the domain-root entry point, HTTPS redirect rules for non-local requests, and baseline security headers. On shared hosting, use the exact database host and credentials shown in the provider control panel, import the SQL, run or trigger the schema migration, and ensure `uploads/` is writable. Remove or restrict `admin/setup.php` after first-admin creation.
+The root `.htaccess` provides the domain-root entry point, HTTPS redirect rules for non-local requests, and baseline security headers. On shared hosting, use the exact database host and credentials shown in the provider control panel and ensure `uploads/` is writable. Remove or restrict `admin/setup.php` after first-admin creation.
 
 ## Customer workflow
 
 1. Visitors can browse destinations, packages, and offers without signing in.
-2. Registration requires a valid email and a password of 8–72 characters with matching confirmation. Login requires a valid email and at least 8 characters.
+2. Registration requires a valid email and a password of 8-72 characters with matching confirmation. Login requires a valid email and at least 8 characters.
 	Booking and contact-form submissions require a signed-in customer.
 3. A signed-in customer selects a published package and submits a booking request. No payment is taken at request time.
 4. The booking starts as `pending`. The customer can follow status and messages in My Trips and in the header notification bell.
 5. If an admin requests information, the customer notification opens the prefilled edit form. The customer can revise the booking; the same booking reference is retained, amounts and travellers are updated, and the request returns to `pending` for review.
 6. Once confirmed, the customer can open checkout. If payment is recorded as paid, an invoice becomes available from My Trips.
+7. Date selection warns about pending overlaps and blocks conflicts with confirmed or active trips.
+8. Eligible customers can request a date amendment or cancellation. The admin reviews the request before booking dates, status, payment, or refund state changes.
 
 ## Booking and pricing rules
 
 - The end date is set from the package duration, counting the start day as day one. The server validates the same duration.
 - Standard hotels are treated as included in the package. Other hotel categories may have an admin-managed upgrade surcharge per traveller for the full trip.
 - The booking stores the package unit price and hotel surcharge snapshots so later catalogue edits do not change historic bills.
-- Package subtotal is package unit price × travellers. Hotel upgrade is surcharge per traveller × travellers. Offers are calculated from the package subtotal; the hotel upgrade is added outside the offer calculation. The stored total is package subtotal + hotel upgrade − offer discount, and is used for checkout and invoices.
+- Package subtotal is package unit price multiplied by travellers. Hotel upgrade is surcharge per traveller multiplied by travellers. Offers are calculated from the package subtotal; the hotel upgrade is added outside the offer calculation. The stored total is package subtotal + hotel upgrade - offer discount, and is used for checkout and invoices.
 - Travellers can be the account holder, saved family members, manually entered travellers, or a permitted combination. Traveller details and PWD assistance flags are snapshotted with the booking.
 - A `needs_information` booking can only be edited by its owner while it remains unpaid. The edit handler rechecks ownership and status on submission.
+- Traveller age is recalculated from date of birth. Current demonstration package rates are adult 100%, child 50%, and senior 90%.
+- One best eligible offer is applied to a booking; offers do not stack and never overwrite the package's normal price.
+- Existing bookings retain package, hotel, offer, traveller, discount, and total snapshots when catalogue data changes.
 
 ## Payment and invoices
 
@@ -178,10 +196,89 @@ Main tables include:
 | `packages`, `hotels`, `transport_categories` | Travel catalogue and accommodation pricing |
 | `offers`, `offer_packages`, `offer_redemptions` | Promotion setup and redemption history |
 | `bookings`, `booking_travellers` | Booking snapshots and traveller details |
+| `booking_amendments`, `cancellation_policies`, `cancellation_requests` | Date-change and cancellation workflows |
+| `booking_reviews` | Moderated customer package reviews |
 | `payments` | Payment attempts and references |
 | `booking_status_history`, `audit_logs` | Workflow and admin audit records |
 | `notifications`, `notification_reads` | Customer/admin notifications and read state |
 | `admins`, `login_attempts` | Admin accounts and authentication throttling |
+
+## Testing
+
+Run the migration and automated workflow checks from the project root:
+
+```powershell
+php db/migrate.php
+php tests/booking-workflow-smoke.php
+php tests/data-integrity-audit.php
+```
+
+Validate every PHP and JavaScript file:
+
+```powershell
+Get-ChildItem -Recurse -Filter *.php | ForEach-Object { php -l $_.FullName }
+Get-ChildItem js -Filter *.js | ForEach-Object { node --check $_.FullName }
+```
+
+The workflow smoke test uses a database transaction and rolls back its test records. The integrity audit checks duplicate booking references, orphaned records, traveller-count mismatches, payment ledgers, unfinished test users, and cancellation-policy availability.
+
+Manually verify registration/login, profile and family edits, package filtering, new booking submission, overlap warnings, admin review, needs-information edits, confirmation, simulated checkout outcomes, amendments, cancellation/refund processing, invoices, notification read state, and responsive light/dark layouts.
+
+## InfinityFree deployment
+
+InfinityFree can run this PHP/MySQL project, but free hosting does not provide terminal access. Use FileZilla FTP for the project and phpMyAdmin for the database.
+
+1. Create the InfinityFree website and MySQL database.
+2. Run `php db/migrate.php` locally before preparing the hosted database export.
+3. Export the complete migrated local database from MySQL or phpMyAdmin.
+4. Import that complete SQL export through InfinityFree phpMyAdmin.
+5. Upload the project contents into `/htdocs`, preserving all directories.
+6. Create a production `/htdocs/config.local.php` using the exact MySQL host, database, username, and password shown by InfinityFree.
+7. Upload the required `uploads/` directories and ensure PHP can write to them.
+8. Enable SSL and test the HTTPS domain.
+9. Create the first administrator through `/admin/setup.php`, then remove or restrict that setup route.
+
+Do **not** open `/db/migrate.php` in a browser. It is intentionally CLI-only and returns `404` for web requests. InfinityFree installations must import a complete database export that already contains the current schema.
+
+### Upload location and filenames
+
+Website files belong inside `/htdocs`, not beside it. InfinityFree uses a case-sensitive Linux filesystem, so every reference must exactly match the uploaded filename:
+
+```text
+Correct: /htdocs/css/package.css
+Wrong:   /htdocs/css/Package.css
+```
+
+The application references lowercase `css/package.css`. A case mismatch can work on Windows but produce missing styles on InfinityFree.
+
+After replacing CSS or PHP files, use `Ctrl + F5` or an Incognito window to bypass browser cache. The current deployed cache references include `package.css?v=2` and `admin.css?v=16`.
+
+### Hosted media and email
+
+- Uploaded image paths are stored in MySQL, but image files remain under `uploads/`.
+- Back up both the database and uploaded files.
+- PHP `mail()` is heavily restricted on InfinityFree. Real email should use PHPMailer and an external SMTP provider.
+- Database-backed header notifications work without email.
+
+## GitHub guidance
+
+The included `.gitignore` excludes local credentials, environment files, runtime uploads, root SQL exports, logs, caches, editor metadata, and deployment archives. Static files under `img/`, `media/`, `css/`, and `js/` remain trackable.
+
+Create and publish the repository:
+
+```powershell
+git init
+git add .
+git status
+git commit -m "Initial Travel India MIS"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git push -u origin main
+```
+
+Before committing, confirm that `config.local.php`, `.env`, customer uploads, and database exports containing customer data are absent from `git status`.
+
+GitHub Pages cannot host this application because it does not execute PHP or provide MySQL. Use GitHub for source control and InfinityFree or another PHP host to run the website.
 
 ## Security and limitations
 
@@ -193,21 +290,6 @@ Main tables include:
 - The checkout is a simulation, not a payment service. Do not enter real payment credentials.
 - Before production, configure HTTPS, restricted database credentials, secure error logging, backups, payment-provider integration if needed, and end-to-end acceptance tests.
 
-## Verification
-
-From PowerShell in the project root:
-
-```powershell
-php db/migrate.php
-Get-ChildItem -Recurse -Filter *.php | ForEach-Object { php -l $_.FullName }
-node --check js/form-validation.js
-node --check js/trip-details.js
-node --check js/practice-checkout.js
-node --check js/admin-booking-workflow.js
-```
-
-Manually verify registration/login, profile/family edits, new booking submission, admin notification bell, needs-information edit/review, confirmation, successful/failed/cancelled checkout outcomes, invoice viewing/printing, notification read/expiry behavior, and light/dark responsive layouts.
-
 ## Project layout
 
 ```text
@@ -218,7 +300,11 @@ db/migrate.php          CLI schema migration
 docs/                   MIS specification and implementation checklist
 img/, media/            Images and media assets
 js/                     Theme, validation, booking and admin interactions
-uploads/                Uploaded catalogue/profile images
+uploads/                Runtime uploaded media (ignored by Git)
+tests/                  Workflow and data-integrity checks
+booking-workflow.php    Date-overlap and cancellation helpers
+booking-request.php     Customer amendment/cancellation request form
+booking-request-submit.php Request validation and persistence
 booking.php             New and needs-information booking form
 bookingins.php          Booking creation/edit processing
 my-bookings.php         Customer trip list, totals and actions
