@@ -8,16 +8,28 @@ $states = [];
 $selectedState = trim($_GET['state'] ?? '');
 $stateName = '';
 $loadError = '';
+$pageSize = 21;
+$currentPage = max(1, filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1);
+$totalPackages = 0;
+$totalPages = 1;
 try {
     $db = db_connect();
     ensure_app_schema($db);
     $stateResult = $db->query("SELECT name,slug FROM states WHERE status='active' ORDER BY name");
     while ($stateResult && $state = $stateResult->fetch_assoc()) { $states[]=$state; if($state['slug']===$selectedState)$stateName=$state['name']; }
     if ($selectedState !== '') {
-        $statement=$db->prepare("SELECT p.*,s.name state_name FROM packages p JOIN states s ON s.id=p.state_id WHERE p.status='published' AND s.slug=? ORDER BY p.name");
-        $statement->bind_param('s',$selectedState); $statement->execute(); $result=$statement->get_result();
+        $countStatement=$db->prepare("SELECT COUNT(*) total FROM packages p JOIN states s ON s.id=p.state_id WHERE p.status='published' AND s.slug=?");
+        $countStatement->bind_param('s',$selectedState);$countStatement->execute();$totalPackages=(int)$countStatement->get_result()->fetch_assoc()['total'];
     } else {
-        $result=$db->query("SELECT p.*,s.name state_name FROM packages p JOIN states s ON s.id=p.state_id WHERE p.status='published' ORDER BY s.name,p.name");
+        $totalPackages=(int)$db->query("SELECT COUNT(*) total FROM packages WHERE status='published'")->fetch_assoc()['total'];
+    }
+    $totalPages=max(1,(int)ceil($totalPackages/$pageSize));$currentPage=min($currentPage,$totalPages);$offset=($currentPage-1)*$pageSize;
+    if ($selectedState !== '') {
+        $statement=$db->prepare("SELECT p.*,s.name state_name FROM packages p JOIN states s ON s.id=p.state_id WHERE p.status='published' AND s.slug=? ORDER BY p.name LIMIT ? OFFSET ?");
+        $statement->bind_param('sii',$selectedState,$pageSize,$offset);$statement->execute();$result=$statement->get_result();
+    } else {
+        $statement=$db->prepare("SELECT p.*,s.name state_name FROM packages p JOIN states s ON s.id=p.state_id WHERE p.status='published' ORDER BY p.name,s.name LIMIT ? OFFSET ?");
+        $statement->bind_param('ii',$pageSize,$offset);$statement->execute();$result=$statement->get_result();
     }
     while ($result && $row = $result->fetch_assoc()) {
         $row['active_offer']=null;$rating=$db->execute_query("SELECT AVG(package_rating) avg_rating,COUNT(*) review_count FROM booking_reviews WHERE package_id=? AND status='published'",[(int)$row['id']])->fetch_assoc();$row['avg_rating']=(float)($rating['avg_rating']??0);$row['review_count']=(int)($rating['review_count']??0);
@@ -50,6 +62,7 @@ try {
 .package-page .package-grid .package-offer{position:static!important;align-self:flex-start!important;margin:0 0 12px!important;padding:6px 9px!important;display:inline-flex!important;border-radius:4px!important;background:#fff0d9!important;color:#8b4f0b!important;font-size:.76rem!important;font-weight:800!important;line-height:1.3!important;text-decoration:none!important}
 .package-page .package-grid .title{margin:0 0 8px!important;line-height:1.12!important}
 .package-page .package-grid .content .btn{width:100%!important;min-height:44px!important;height:auto!important;margin:18px 0 0!important;margin-top:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+.package-page .package-pagination{width:min(1240px,100%);margin:30px auto 0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px}.package-page .package-pagination>a,.package-page .package-pagination>span{min-width:42px;min-height:42px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid var(--border,#d8e0e2);border-radius:5px;background:var(--surface,#fff);color:var(--text,#172326);font-weight:800;text-decoration:none}.package-page .package-pagination>a:hover,.package-page .package-pagination>a:focus-visible,.package-page .package-pagination>.is-current{border-color:var(--brand,#0d8d82);background:var(--brand,#0d8d82);color:#fff}.package-page .package-pagination>.is-disabled{opacity:.5}
 @media(max-width:980px){.package-page .package-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:1100px){.package-page .package-filter{grid-template-columns:1fr!important}.package-page .package-filter-controls{grid-template-columns:minmax(180px,.85fr) minmax(280px,1.25fr) max-content max-content!important}}@media(max-width:760px){.package-page .package-filter-controls{grid-template-columns:1fr 1fr!important}.package-page .package-search-group{grid-column:1/-1!important;grid-row:1!important}}@media(max-width:620px){.package-page .feature{padding-inline:14px!important}.package-page .package-filter{align-items:stretch!important}.package-page .package-filter-controls{width:100%!important;grid-template-columns:1fr!important}.package-page .package-filter select{width:100%!important;min-width:0!important}.package-page .package-search-group{grid-column:auto!important;grid-row:auto!important}.package-page .package-search-button,.package-page .package-offers-toggle,.package-page .package-filter-reset{width:100%!important}.package-page .package-grid{grid-template-columns:1fr!important;gap:18px!important}.package-page .package-grid .content{min-height:0!important}}
 </style>
@@ -72,7 +85,16 @@ try {
 <?php endforeach; ?>
 <div class="package-no-results" id="package-no-results" hidden><h2>No matching destinations</h2><p>Try another destination name, state, or turn off the offers-only filter.</p></div>
 <?php if(!$loadError && !$packages):?><div class="empty-packages"><h2>Packages coming soon</h2><p>We are preparing curated journeys for <?php echo e($stateName?:'this region'); ?>.</p><a href="Package.php">View all available packages</a></div><?php endif;?>
-</div></section>
+</div>
+<?php if(!$loadError && $totalPages>1):?><nav class="package-pagination" aria-label="Package pages">
+<?php $pageQuery=$selectedState!==''?['state'=>$selectedState]:[];$previous=max(1,$currentPage-1);$next=min($totalPages,$currentPage+1);?>
+<?php if($currentPage>1):?><a href="?<?php echo e(http_build_query($pageQuery+['page'=>$previous]));?>" aria-label="Previous package page"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i><span class="sr-only">Previous</span></a><?php else:?><span class="is-disabled" aria-hidden="true"><i class="fa-solid fa-chevron-left"></i></span><?php endif;?>
+<?php $start=max(1,$currentPage-2);$end=min($totalPages,$currentPage+2);if($start>1):?><a href="?<?php echo e(http_build_query($pageQuery+['page'=>1]));?>">1</a><?php if($start>2):?><span class="is-disabled">&hellip;</span><?php endif;?><?php endif;?>
+<?php for($page=$start;$page<=$end;$page++):?><?php if($page===$currentPage):?><span class="is-current" aria-current="page"><?php echo $page;?></span><?php else:?><a href="?<?php echo e(http_build_query($pageQuery+['page'=>$page]));?>"><?php echo $page;?></a><?php endif;?><?php endfor;?>
+<?php if($end<$totalPages):?><?php if($end<$totalPages-1):?><span class="is-disabled">&hellip;</span><?php endif;?><a href="?<?php echo e(http_build_query($pageQuery+['page'=>$totalPages]));?>"><?php echo $totalPages;?></a><?php endif;?>
+<?php if($currentPage<$totalPages):?><a href="?<?php echo e(http_build_query($pageQuery+['page'=>$next]));?>" aria-label="Next package page"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i><span class="sr-only">Next</span></a><?php else:?><span class="is-disabled" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span><?php endif;?>
+</nav><?php endif;?>
+</section>
 <?php include 'footer.php'; ?>
 <script>
 if('scrollRestoration' in history){history.scrollRestoration='manual'}if(!location.hash){scrollTo(0,0)}

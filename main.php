@@ -33,7 +33,7 @@ try {
     <link rel="icon" href="img/favicon.jpg?v=1" type="image/jpeg">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/sample.css">
-    <link rel="stylesheet" href="css/home-offers.css?v=11">
+    <link rel="stylesheet" href="css/home-offers.css?v=13">
 </head>
 <body>
 <?php include 'header.php'; ?>
@@ -57,14 +57,12 @@ try {
 <section class="home-offers home-offers-simple" aria-labelledby="home-offers-title">
     <div class="home-offers-head"><div><span>Limited-time journeys</span><h2 id="home-offers-title">Special Offers</h2></div></div>
     <div class="home-offers-stage">
-        <div class="home-offers-background" style="background-image:url(&quot;img/9.jpg&quot;)" aria-hidden="true"></div>
-        <div class="home-offers-list">
+        <div class="home-offers-list" style="--offer-columns:<?php echo min(3,count($homeOffers));?>">
         <?php foreach ($homeOffers as $offer): $offerUrl='offers.php?offer_id='.(int)$offer['id']; ?>
             <article class="home-offer-card">
                 <a class="home-offer-image" href="<?php echo e($offerUrl); ?>" aria-label="Get offer: <?php echo e($offer['public_heading']); ?>">
                     <img src="<?php echo e($offer['display_image']); ?>" alt="<?php echo e($offer['public_heading']); ?>" loading="lazy">
                 </a>
-                <a class="home-offer-button" href="<?php echo e($offerUrl); ?>">Get Offer <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </article>
         <?php endforeach; ?>
         </div>
