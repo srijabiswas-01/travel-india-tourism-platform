@@ -122,7 +122,7 @@
     const packageLink = event.target.closest('.feature .card a[href="#"]');
     if (packageLink) {
       event.preventDefault();
-      window.location.href = 'View.php';
+      window.location.href = 'view.php';
     }
   });
 })();

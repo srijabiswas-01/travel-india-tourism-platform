@@ -66,7 +66,7 @@ try {
     <?php if($package['review_count']):?><p class="package-state"><i class="fa-solid fa-star"></i> <?php echo number_format((float)$package['avg_rating'],1);?>/5 from <?php echo (int)$package['review_count'];?> review<?php echo (int)$package['review_count']===1?'':'s';?></p><?php endif;?><div class="stars" aria-label="<?php echo (int)$package['hotel_rating']; ?> star accommodation">
       <?php for ($i=1; $i<=5; $i++): ?><span class="fa fa-star<?php echo $i <= (int)$package['hotel_rating'] ? ' checked' : ''; ?>"></span><?php endfor; ?>
     </div>
-    <a href="View.php?id=<?php echo (int)$package['id']; ?><?php if($package['active_offer']):?>&offer_id=<?php echo (int)$package['active_offer']['id'];?><?php echo $package['active_offer']['code']?'&offer_code='.urlencode($package['active_offer']['code']):'';?><?php endif;?>" class="btn">View Details</a>
+    <a href="view.php?id=<?php echo (int)$package['id']; ?><?php if($package['active_offer']):?>&offer_id=<?php echo (int)$package['active_offer']['id'];?><?php echo $package['active_offer']['code']?'&offer_code='.urlencode($package['active_offer']['code']):'';?><?php endif;?>" class="btn">View Details</a>
   </div>
 </article>
 <?php endforeach; ?>

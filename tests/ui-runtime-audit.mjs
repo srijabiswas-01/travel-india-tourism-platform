@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 
 const endpoint = process.env.CHROME_DEBUG_URL || 'http://127.0.0.1:9222';
 const site = process.env.TRAVEL_INDIA_URL || 'http://127.0.0.1:8000';
-const pages = ['main.php', 'Package.php', 'offers.php', 'about.php', 'contactus.php', 'policies.php', 'admin/login.php'];
+const pages = ['main.php', 'Package.php', 'view.php?id=12', 'offers.php', 'about.php', 'contactus.php', 'policies.php', 'admin/login.php'];
 const viewports = [{ name: 'mobile', width: 390, height: 844 }, { name: 'desktop', width: 1440, height: 1000 }];
 
 async function target() {
@@ -99,11 +99,12 @@ for (const viewport of viewports) {
     const data = result.result.value;
     const consoleErrors = cdp.events.filter(event => event.method === 'Runtime.consoleAPICalled' && event.params.type === 'error').length;
     const requestFailures = cdp.events.filter(event => event.method === 'Network.loadingFailed' && !event.params.canceled).length;
+    const httpErrors = cdp.events.filter(event => event.method === 'Network.responseReceived' && event.params.response.status >= 400).length;
     const wrongViewport = Math.abs(data.innerWidth - viewport.width) > 2;
     const overflow = data.scrollWidth > data.viewportWidth + 2;
-    const passed = !wrongViewport && !overflow && data.brokenImages.length === 0 && consoleErrors === 0 && requestFailures === 0;
+    const passed = !wrongViewport && !overflow && data.brokenImages.length === 0 && consoleErrors === 0 && requestFailures === 0 && httpErrors === 0;
     if (!passed) failures++;
-    console.log(`${passed ? 'PASS' : 'FAIL'} ${viewport.name.padEnd(7)} ${page.padEnd(20)} width=${data.viewportWidth}/${data.scrollWidth} images=${data.brokenImages.length} console=${consoleErrors} network=${requestFailures}`);
+    console.log(`${passed ? 'PASS' : 'FAIL'} ${viewport.name.padEnd(7)} ${page.padEnd(20)} width=${data.viewportWidth}/${data.scrollWidth} images=${data.brokenImages.length} console=${consoleErrors} network=${requestFailures + httpErrors}`);
     if (wrongViewport) console.log(`  Viewport mismatch: expected ${viewport.width}px, rendered ${data.innerWidth}px`);
     if (overflow) console.log(`  Overflow: ${JSON.stringify(data.overflowing)}`);
   }
