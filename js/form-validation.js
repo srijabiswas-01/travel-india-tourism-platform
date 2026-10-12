@@ -9,6 +9,8 @@
       const text = copy.textContent.trim().replace(/\s+/g, ' ').replace(/:$/, '');
       if (text) return text.toLowerCase();
     }
+    const floatingLabel = field.parentElement?.querySelector(':scope > span:not(.field-error)');
+    if (floatingLabel?.textContent.trim()) return floatingLabel.textContent.trim().replace(/\s+/g, ' ').replace(/:$/, '').toLowerCase();
     return (field.name || field.id || 'this field').replace(/\[\]$/, '').replace(/[_-]+/g, ' ').toLowerCase();
   };
 

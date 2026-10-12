@@ -104,14 +104,35 @@ function ensure_app_schema(mysqli $db): void
     add_column($db, 'states', $columns, 'country_id', 'int DEFAULT NULL AFTER id');
     $db->query("UPDATE states SET country_id=(SELECT id FROM countries WHERE iso_code='IND' LIMIT 1) WHERE country_id IS NULL");
     $db->query("CREATE TABLE IF NOT EXISTS destinations (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,state_id int NOT NULL,name varchar(150) NOT NULL,slug varchar(160) NOT NULL UNIQUE,description text,status varchar(30) NOT NULL DEFAULT 'active',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,INDEX(state_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $db->query("CREATE TABLE IF NOT EXISTS hotels (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,destination_id int NOT NULL,name varchar(180) NOT NULL,category varchar(60) NOT NULL DEFAULT 'Standard',address varchar(500) DEFAULT NULL,description varchar(1000) DEFAULT NULL,status varchar(30) NOT NULL DEFAULT 'active',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,UNIQUE KEY hotel_destination_name(destination_id,name),INDEX(destination_id),INDEX(status)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $db->query("CREATE TABLE IF NOT EXISTS hotels (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,destination_id int DEFAULT NULL,name varchar(180) NOT NULL,category varchar(60) NOT NULL DEFAULT 'Standard',address varchar(500) DEFAULT NULL,description varchar(1000) DEFAULT NULL,status varchar(30) NOT NULL DEFAULT 'active',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,UNIQUE KEY hotel_destination_name(destination_id,name),INDEX(destination_id),INDEX(status)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $columns = table_columns($db, 'hotels');
+    if (!$db->query('ALTER TABLE hotels MODIFY destination_id int DEFAULT NULL')) throw new RuntimeException('Could not enable global accommodation options: '.$db->error);
     add_column($db, 'hotels', $columns, 'upgrade_surcharge', 'decimal(10,2) NOT NULL DEFAULT 0');
+    $db->query("UPDATE hotels SET name=CONCAT(category,' accommodation #',id),address=NULL WHERE name NOT LIKE CONCAT(category,' accommodation%') OR address IS NOT NULL");
+    if (!$db->query("CREATE TABLE IF NOT EXISTS meal_plans (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,destination_id int DEFAULT NULL,name varchar(80) NOT NULL,plan_type varchar(20) NOT NULL DEFAULT 'premium',included_meals varchar(255) NOT NULL DEFAULT 'Breakfast, lunch and dinner',description text DEFAULT NULL,surcharge_per_traveller decimal(10,2) NOT NULL DEFAULT 0,supports_veg tinyint(1) NOT NULL DEFAULT 1,supports_nonveg tinyint(1) NOT NULL DEFAULT 1,status varchar(30) NOT NULL DEFAULT 'active',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at timestamp NULL DEFAULT NULL,INDEX(destination_id),INDEX(status)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4")) throw new RuntimeException('Could not create meal_plans: '.$db->error);
+    $columns = table_columns($db, 'meal_plans');
+    add_column($db, 'meal_plans', $columns, 'destination_id', 'int DEFAULT NULL');
+    add_column($db, 'meal_plans', $columns, 'name', "varchar(80) NOT NULL DEFAULT 'Meal plan'");
+    add_column($db, 'meal_plans', $columns, 'plan_type', "varchar(20) NOT NULL DEFAULT 'premium'");
+    add_column($db, 'meal_plans', $columns, 'included_meals', "varchar(255) NOT NULL DEFAULT 'Breakfast, lunch and dinner'");
+    add_column($db, 'meal_plans', $columns, 'description', 'text DEFAULT NULL');
+    add_column($db, 'meal_plans', $columns, 'surcharge_per_traveller', 'decimal(10,2) NOT NULL DEFAULT 0');
+    add_column($db, 'meal_plans', $columns, 'supports_veg', 'tinyint(1) NOT NULL DEFAULT 1');
+    add_column($db, 'meal_plans', $columns, 'supports_nonveg', 'tinyint(1) NOT NULL DEFAULT 1');
+    add_column($db, 'meal_plans', $columns, 'status', "varchar(30) NOT NULL DEFAULT 'active'");
+    add_column($db, 'meal_plans', $columns, 'created_at', 'datetime NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    add_column($db, 'meal_plans', $columns, 'updated_at', 'datetime NULL DEFAULT NULL');
+    if (!$db->query("INSERT INTO meal_plans(destination_id,name,plan_type,surcharge_per_traveller,description) SELECT NULL,'Standard meals','standard',0,'Standard vegetarian or non-vegetarian meals included with the package' WHERE NOT EXISTS(SELECT 1 FROM meal_plans WHERE plan_type='standard' AND destination_id IS NULL)")) throw new RuntimeException('Could not initialize Standard meals: '.$db->error);
+    $db->query("UPDATE meal_plans SET surcharge_per_traveller=0,status='active' WHERE plan_type='standard' AND destination_id IS NULL");
+    $db->query("UPDATE meal_plans SET name=CASE WHEN plan_type='standard' THEN 'Standard meals' ELSE 'Premium meals' END");
+    $db->query("UPDATE meal_plans duplicate_plan JOIN meal_plans keeper ON keeper.plan_type=duplicate_plan.plan_type AND keeper.destination_id <=> duplicate_plan.destination_id AND keeper.id<duplicate_plan.id SET duplicate_plan.status='disabled' WHERE duplicate_plan.status='active'");
     $db->query("CREATE TABLE IF NOT EXISTS offers (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,name varchar(160) NOT NULL,slug varchar(180) NOT NULL UNIQUE,public_heading varchar(200) NOT NULL,description text DEFAULT NULL,terms text DEFAULT NULL,image varchar(255) DEFAULT NULL,code varchar(50) DEFAULT NULL UNIQUE,discount_type varchar(20) NOT NULL DEFAULT 'percentage',discount_value decimal(10,2) NOT NULL,calculation_scope varchar(30) NOT NULL DEFAULT 'booking_total',minimum_travellers int NOT NULL DEFAULT 1,minimum_booking_amount decimal(10,2) NOT NULL DEFAULT 0,maximum_discount decimal(10,2) DEFAULT NULL,booking_start_at datetime NOT NULL,booking_end_at datetime NOT NULL,usage_limit int DEFAULT NULL,per_customer_limit int DEFAULT NULL,is_automatic tinyint(1) NOT NULL DEFAULT 1,is_featured tinyint(1) NOT NULL DEFAULT 0,priority int NOT NULL DEFAULT 0,status varchar(30) NOT NULL DEFAULT 'draft',created_by int DEFAULT NULL,created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,INDEX(status),INDEX(booking_start_at),INDEX(booking_end_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $db->query("CREATE TABLE IF NOT EXISTS offer_packages (offer_id int NOT NULL,package_id int NOT NULL,PRIMARY KEY(offer_id,package_id),INDEX(package_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $db->query("CREATE TABLE IF NOT EXISTS offer_redemptions (id bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,offer_id int NOT NULL,booking_id int NOT NULL,user_email varchar(500) NOT NULL,base_amount decimal(10,2) NOT NULL,discount_amount decimal(10,2) NOT NULL,final_amount decimal(10,2) NOT NULL,redeemed_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE KEY booking_offer(booking_id,offer_id),INDEX(offer_id),INDEX(user_email)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $db->query("CREATE TABLE IF NOT EXISTS transport_categories (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,name varchar(100) NOT NULL UNIQUE,description varchar(500) DEFAULT NULL,status varchar(30) NOT NULL DEFAULT 'active',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $db->query("INSERT IGNORE INTO transport_categories(name,description) VALUES ('Air-conditioned transport','Comfortable air-conditioned road transport'),('Private car','Private point-to-point car service'),('Train and coach','Rail journey with local coach transfers'),('Flight and transfers','Flight with airport and local transfers')");
+    $db->query("CREATE TABLE IF NOT EXISTS trip_themes (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,name varchar(100) NOT NULL UNIQUE,slug varchar(110) NOT NULL UNIQUE,description varchar(500) DEFAULT NULL,status varchar(30) NOT NULL DEFAULT 'active',display_order int NOT NULL DEFAULT 0,created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,INDEX(status),INDEX(display_order)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $db->query("INSERT IGNORE INTO trip_themes(name,slug,description,display_order) VALUES ('Leisure','leisure','Relaxed sightseeing and recreation',10),('Family holiday','family_holiday','Journeys planned for families',20),('Couple','couple','Travel for couples',30),('Friends','friends','Group travel with friends',40),('Solo','solo','Individual travel',50),('Business','business','Work-related travel',60),('Pilgrimage','pilgrimage','Religious and spiritual journeys',70),('Adventure','adventure','Activity and adventure travel',80),('Wellness','wellness','Health, relaxation, and wellness travel',90),('Other','other','Other travel requirements',100)");
     $db->query("CREATE TABLE IF NOT EXISTS packages (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,name varchar(150) NOT NULL,slug varchar(160) NOT NULL UNIQUE,destination varchar(150) NOT NULL,description text NOT NULL,image varchar(255) NOT NULL,price decimal(10,2) NOT NULL,duration_days int NOT NULL DEFAULT 3,hotel_rating tinyint NOT NULL DEFAULT 3,transport varchar(255) NOT NULL DEFAULT 'Air-conditioned transport',status varchar(30) NOT NULL DEFAULT 'published',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $columns = table_columns($db, 'packages');
     add_column($db, 'packages', $columns, 'state_id', 'int DEFAULT NULL AFTER id');
@@ -119,6 +140,7 @@ function ensure_app_schema(mysqli $db): void
     add_column($db, 'packages', $columns, 'transport_category_id', 'int DEFAULT NULL AFTER destination_id');
     $db->query("UPDATE packages SET transport_category_id=(SELECT id FROM transport_categories WHERE name='Air-conditioned transport' LIMIT 1) WHERE transport_category_id IS NULL");
     add_column($db, 'packages', $columns, 'currency', "char(3) NOT NULL DEFAULT 'INR' AFTER price");
+    add_column($db, 'packages', $columns, 'visit_places', 'text DEFAULT NULL AFTER description');
     $db->query("CREATE TABLE IF NOT EXISTS bookings (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,from_date date NOT NULL,to_date date NOT NULL,destination varchar(255) NOT NULL,hotel varchar(255) NOT NULL,people int NOT NULL,customer_name varchar(500) NOT NULL,created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $columns = table_columns($db, 'bookings');
     add_column($db, 'bookings', $columns, 'booking_reference', 'varchar(24) DEFAULT NULL');
@@ -127,11 +149,16 @@ function ensure_app_schema(mysqli $db): void
     add_column($db, 'bookings', $columns, 'hotel_id', 'int DEFAULT NULL AFTER package_id');
     add_column($db, 'bookings', $columns, 'hotel_surcharge_per_traveller', 'decimal(10,2) NOT NULL DEFAULT 0');
     add_column($db, 'bookings', $columns, 'hotel_surcharge_total', 'decimal(10,2) NOT NULL DEFAULT 0');
+    add_column($db, 'bookings', $columns, 'meal_plan_id', 'int DEFAULT NULL');
+    add_column($db, 'bookings', $columns, 'meal_plan_name', "varchar(80) NOT NULL DEFAULT 'Standard meals (included)'");
+    add_column($db, 'bookings', $columns, 'meal_surcharge_per_traveller', 'decimal(10,2) NOT NULL DEFAULT 0');
+    add_column($db, 'bookings', $columns, 'meal_surcharge_total', 'decimal(10,2) NOT NULL DEFAULT 0');
     add_column($db, 'bookings', $columns, 'status', "varchar(30) NOT NULL DEFAULT 'pending'");
     add_column($db, 'bookings', $columns, 'total_amount', 'decimal(10,2) NOT NULL DEFAULT 0');
     add_column($db, 'bookings', $columns, 'payment_status', "varchar(30) NOT NULL DEFAULT 'unpaid'");
     add_column($db, 'bookings', $columns, 'customer_note', 'text DEFAULT NULL');
     add_column($db, 'bookings', $columns, 'trip_category', "varchar(30) NOT NULL DEFAULT 'family'");
+    add_column($db, 'bookings', $columns, 'trip_theme', "varchar(30) NOT NULL DEFAULT 'leisure'");
     add_column($db, 'bookings', $columns, 'package_unit_price', 'decimal(10,2) NOT NULL DEFAULT 0');
     add_column($db, 'bookings', $columns, 'base_amount', 'decimal(10,2) NOT NULL DEFAULT 0');
     add_column($db, 'bookings', $columns, 'offer_id', 'int DEFAULT NULL');
@@ -142,6 +169,9 @@ function ensure_app_schema(mysqli $db): void
     add_column($db, 'bookings', $columns, 'discount_amount', 'decimal(10,2) NOT NULL DEFAULT 0');
     add_column($db, 'bookings', $columns, 'admin_note', 'text DEFAULT NULL');
     add_column($db, 'bookings', $columns, 'updated_at', 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
+    add_column($db, 'bookings', $columns, 'customer_hidden_at', 'timestamp NULL DEFAULT NULL');
+    $db->query("UPDATE bookings b JOIN meal_plans m ON m.id=b.meal_plan_id SET b.meal_plan_name=CASE WHEN m.plan_type='standard' THEN 'Standard meals (included)' ELSE 'Premium meals' END");
+    $db->query("UPDATE bookings b LEFT JOIN hotels h ON h.id=b.hotel_id SET b.hotel=CASE WHEN h.id IS NULL OR h.category='Standard' THEN 'Standard accommodation (included)' ELSE CONCAT(h.category,' accommodation') END");
     $db->query("UPDATE bookings SET admin_note='Payment received in full.' WHERE payment_status='paid' AND LOWER(TRIM(admin_note)) IN ('pay the amount','please pay the amount','pay amount','please pay amount')");
     ensure_unique_booking_references($db);
     $db->query("CREATE TABLE IF NOT EXISTS booking_travellers (id int NOT NULL AUTO_INCREMENT PRIMARY KEY,booking_id int NOT NULL,family_member_id int DEFAULT NULL,name varchar(150) NOT NULL,relationship varchar(80) DEFAULT NULL,date_of_birth date DEFAULT NULL,gender varchar(30) DEFAULT NULL,medical_issues text DEFAULT NULL,traveller_type varchar(30) NOT NULL DEFAULT 'other',created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,INDEX(booking_id),INDEX(family_member_id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
@@ -150,6 +180,11 @@ function ensure_app_schema(mysqli $db): void
     add_column($db, 'booking_travellers', $columns, 'age_category', "varchar(20) NOT NULL DEFAULT 'adult' AFTER phone");
     add_column($db, 'booking_travellers', $columns, 'is_pwd', 'tinyint(1) NOT NULL DEFAULT 0');
     add_column($db, 'booking_travellers', $columns, 'pwd_details', 'varchar(500) DEFAULT NULL');
+    add_column($db, 'booking_travellers', $columns, 'meal_plan_name', "varchar(80) NOT NULL DEFAULT 'Standard meals (included)'");
+    add_column($db, 'booking_travellers', $columns, 'food_preference', "varchar(30) NOT NULL DEFAULT 'Vegetarian'");
+    add_column($db, 'booking_travellers', $columns, 'dietary_notes', 'varchar(500) DEFAULT NULL');
+    add_column($db, 'booking_travellers', $columns, 'meal_surcharge', 'decimal(10,2) NOT NULL DEFAULT 0');
+    $db->query("UPDATE booking_travellers bt JOIN bookings b ON b.id=bt.booking_id SET bt.meal_plan_name=b.meal_plan_name");
 
     $db->query("CREATE TABLE IF NOT EXISTS message (email varchar(500) NOT NULL,fname varchar(500) NOT NULL,lname varchar(500) NOT NULL,sub varchar(500) NOT NULL,message text NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $columns = table_columns($db, 'message');
@@ -179,6 +214,55 @@ function ensure_app_schema(mysqli $db): void
     seed_packages($db);
     migrate_india_catalog($db);
     seed_state_packages($db);
+    seed_package_visit_places($db);
+}
+
+function seed_package_visit_places(mysqli $db): void
+{
+    $places = [
+        'Port Blair'=>'Cellular Jail, Corbyn Cove Beach, Ross Island, North Bay Island, Samudrika Museum, Chidiya Tapu',
+        'Visakhapatnam'=>'RK Beach, Kailasagiri, INS Kursura Museum, Simhachalam Temple, Rushikonda Beach, Borra Caves',
+        'Tawang'=>'Tawang Monastery, Sela Pass, Madhuri Lake, Tawang War Memorial, Nuranang Falls, Bum La Pass',
+        'Kaziranga'=>'Kaziranga National Park, Kohora Range, Bagori Range, Orchid Park, Kakochang Waterfalls, Tea Gardens',
+        'Bodh Gaya'=>'Mahabodhi Temple, Bodhi Tree, Great Buddha Statue, Thai Monastery, Royal Bhutan Monastery, Archaeological Museum',
+        'Chandigarh City'=>'Rock Garden, Sukhna Lake, Rose Garden, Capitol Complex, Government Museum, Japanese Garden',
+        'Jagdalpur'=>'Chitrakote Falls, Tirathgarh Falls, Kanger Valley National Park, Kutumsar Caves, Danteshwari Temple, Anthropological Museum',
+        'Daman'=>'Devka Beach, Jampore Beach, Moti Daman Fort, Nani Daman Fort, Bom Jesus Church, Daman Lighthouse',
+        'New Delhi'=>'India Gate, Red Fort, Qutub Minar, Humayun Tomb, Lotus Temple, Raj Ghat, Akshardham Temple',
+        'Panaji'=>'Fontainhas, Our Lady of Immaculate Conception Church, Miramar Beach, Dona Paula, Mandovi River, Reis Magos Fort',
+        'Ahmedabad'=>'Sabarmati Ashram, Adalaj Stepwell, Sidi Saiyyed Mosque, Kankaria Lake, Calico Museum, Science City',
+        'Kurukshetra'=>'Brahma Sarovar, Jyotisar, Krishna Museum, Sannihit Sarovar, Bhadrakali Temple, Sheikh Chilli Tomb',
+        'Manali'=>'Hadimba Temple, Solang Valley, Rohtang Pass, Manu Temple, Vashisht Hot Springs, Mall Road',
+        'Srinagar'=>'Dal Lake, Mughal Gardens, Shankaracharya Temple, Hazratbal Shrine, Pari Mahal, Old City',
+        'Ranchi'=>'Dassam Falls, Hundru Falls, Tagore Hill, Jagannath Temple, Rock Garden, Birsa Zoological Park',
+        'Mysuru'=>'Mysore Palace, Chamundi Hills, Brindavan Gardens, St Philomena Cathedral, Mysore Zoo, Jaganmohan Palace',
+        'Munnar'=>'Eravikulam National Park, Mattupetty Dam, Tea Museum, Top Station, Echo Point, Kundala Lake',
+        'Leh'=>'Leh Palace, Shanti Stupa, Thiksey Monastery, Magnetic Hill, Hall of Fame, Pangong Lake',
+        'Agatti'=>'Agatti Beach, Agatti Lagoon, Bangaram Island, Thinnakara Island, Kalpitti Island, Marine Museum',
+        'Khajuraho'=>'Western Group of Temples, Kandariya Mahadeva Temple, Lakshmana Temple, Eastern Group of Temples, Archaeological Museum, Raneh Falls',
+        'Mumbai'=>'Gateway of India, Marine Drive, Chhatrapati Shivaji Terminus, Elephanta Caves, Colaba Causeway, Siddhivinayak Temple',
+        'Imphal'=>'Kangla Fort, Loktak Lake, Ima Keithel, Shri Govindajee Temple, INA Museum, Keibul Lamjao National Park',
+        'Shillong'=>'Umiam Lake, Elephant Falls, Shillong Peak, Ward Lake, Don Bosco Museum, Laitlum Canyons',
+        'Aizawl'=>'Solomon Temple, Mizoram State Museum, Durtlang Hills, Reiek Tlang, KV Paradise, Falkawn Village',
+        'Kohima'=>'Kohima War Cemetery, Kisama Heritage Village, Dzukou Valley, Nagaland State Museum, Japfu Peak, Cathedral of Mary Help of Christians',
+        'Puri'=>'Jagannath Temple, Puri Beach, Gundicha Temple, Narendra Tank, Raghurajpur Village, Chilika Lake',
+        'Puducherry City'=>'Promenade Beach, Sri Aurobindo Ashram, Auroville, French Quarter, Paradise Beach, Basilica of the Sacred Heart',
+        'Amritsar'=>'Golden Temple, Jallianwala Bagh, Wagah Border, Partition Museum, Durgiana Temple, Gobindgarh Fort',
+        'Jaipur'=>'Amber Fort, City Palace, Hawa Mahal, Jantar Mantar, Jal Mahal, Nahargarh Fort',
+        'Gangtok'=>'MG Marg, Rumtek Monastery, Tsomgo Lake, Nathula Pass, Tashi View Point, Namgyal Institute of Tibetology',
+        'Madurai'=>'Meenakshi Amman Temple, Thirumalai Nayakkar Palace, Gandhi Memorial Museum, Vandiyur Mariamman Teppakulam, Alagar Kovil, Pazhamudhir Solai',
+        'Hyderabad'=>'Charminar, Golconda Fort, Salar Jung Museum, Hussain Sagar, Chowmahalla Palace, Qutb Shahi Tombs',
+        'Agartala'=>'Ujjayanta Palace, Neermahal, Tripura Sundari Temple, Heritage Park, Sepahijala Wildlife Sanctuary, Chaturdasha Temple',
+        'Agra'=>'Taj Mahal, Agra Fort, Mehtab Bagh, Itmad-ud-Daulah Tomb, Akbar Tomb, Fatehpur Sikri',
+        'Haridwar'=>'Har Ki Pauri, Mansa Devi Temple, Chandi Devi Temple, Daksh Mahadev Temple, Bharat Mata Mandir, Shantikunj',
+        'Darjeeling'=>'Tiger Hill, Batasia Loop, Himalayan Railway, Padmaja Naidu Zoo, Peace Pagoda, Tea Gardens',
+        'Dalhousie'=>'Khajjiar, Dainkund Peak, Panchpula, Kalatop Wildlife Sanctuary, St John Church, Subhash Baoli',
+        'Dharamshala'=>'McLeod Ganj, Dalai Lama Temple, Bhagsu Waterfall, Namgyal Monastery, Dal Lake, Triund',
+        'Kasauli'=>'Monkey Point, Gilbert Trail, Sunset Point, Christ Church, Mall Road, Kasauli Brewery',
+        'Mathura'=>'Krishna Janmabhoomi, Dwarkadhish Temple, Vishram Ghat, Govardhan Hill, Prem Mandir, Banke Bihari Temple'
+    ];
+    $statement=$db->prepare("UPDATE packages SET visit_places=? WHERE LOWER(destination)=LOWER(?) AND (visit_places IS NULL OR TRIM(visit_places)='')");
+    foreach($places as $destination=>$list){$statement->bind_param('ss',$list,$destination);$statement->execute();}
 }
 
 function seed_destinations(mysqli $db): void

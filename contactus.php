@@ -20,7 +20,7 @@ require_once 'security.php';
             <ul class="info">
                 <li><span><img src="img/location.png" alt=""></span><span><i>658 Salt Lake City Block Sector 1, Kolkata-700064</i></span></li>
                 <li><span><img src="img/call.png" alt=""></span><span><i>+91 03324567890</i></span></li>
-                <li><span><img src="img/mail.png" alt=""></span><span><i>TravelIndia@gmail.com</i></span></li>
+                <li><span><img src="img/mail.png" alt=""></span><span><i>travelindia@gmail.com</i></span></li>
             </ul>
             <ul class="map"><li><a href="https://www.google.com/maps/place/Travel+India/@22.5499067,88.3484806,13z/data=!4m9!1m2!2m1!1smap+of+travelIndia!3m5!1s0x3a027701d02af9b9:0x4e97f5e63470452b!8m2!3d22.5510036!4d88.3604903!15sChJtYXAgb2YgdHJhdmVsSW5kaWGSAQ10cmF2ZWxfYWdlbmN5"><img src="img/map.jpg" alt="Travel India location map"></a></li></ul>
             <nav class="contact-networks" aria-label="Travel India social media">

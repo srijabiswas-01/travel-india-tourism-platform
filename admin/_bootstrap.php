@@ -5,7 +5,7 @@ function admin_db(): mysqli { return db_connect(); }
 function admin_logged_in(): bool { return !empty($_SESSION['admin_id']); }
 function require_admin(): void {
     if(!admin_logged_in())redirect_with_message('login.php','Sign in with an administrator account.');
-    $routePermissions=['index.php'=>'dashboard.view','regions.php'=>'catalog.manage','packages.php'=>'catalog.manage','hotels.php'=>'catalog.manage','transports.php'=>'catalog.manage','offers.php'=>'catalog.manage','bookings.php'=>'bookings.manage','booking-details.php'=>'bookings.manage','booking-request-action.php'=>'bookings.manage','reviews.php'=>'bookings.manage','notifications.php'=>'notifications.manage','inbox.php'=>'messages.manage','messages.php'=>'messages.manage','customers.php'=>'customers.view','reports.php'=>'reports.view','admins.php'=>'admins.manage'];
+    $routePermissions=['index.php'=>'dashboard.view','regions.php'=>'catalog.manage','packages.php'=>'catalog.manage','hotels.php'=>'catalog.manage','meals.php'=>'catalog.manage','transports.php'=>'catalog.manage','trip-themes.php'=>'catalog.manage','offers.php'=>'catalog.manage','bookings.php'=>'bookings.manage','booking-details.php'=>'bookings.manage','booking-workflow-data.php'=>'bookings.manage','booking-request-action.php'=>'bookings.manage','reviews.php'=>'bookings.manage','notifications.php'=>'notifications.manage','inbox.php'=>'messages.manage','messages.php'=>'messages.manage','customers.php'=>'customers.view','reports.php'=>'reports.view','admins.php'=>'admins.manage'];
     $route=basename($_SERVER['PHP_SELF']??'');
     if(isset($routePermissions[$route])&&!admin_can($routePermissions[$route]))redirect_with_message('index.php','You do not have permission to access that module.');
 }
@@ -51,4 +51,17 @@ function admin_pagination(array $pagination): void {
     echo '<nav class="pagination" aria-label="Table pages">';
     for($i=max(1,$page-2);$i<=min($pages,$page+2);$i++){$query=$_GET;$query[$parameter]=$i;$active=$i===$page?' class="active"':'';echo '<a'.$active.' href="?'.e(http_build_query($query)).'">'.$i.'</a>';}
     echo '</nav>';
+}
+function admin_search(): string { return trim((string)($_GET['q']??'')); }
+function admin_search_condition(mysqli $db,array $columns,string $search): string {
+    if($search===''||!$columns)return '';
+    $like="'%".$db->real_escape_string($search)."%'";
+    return '('.implode(' OR ',array_map(static fn(string $column): string=>$column.' LIKE '.$like,$columns)).')';
+}
+function admin_directory_tools(string $resetUrl,string $placeholder='Search records',array $hidden=[]): void {
+    $search=admin_search();
+    echo '<form class="search-form directory-tools" method="get">';
+    foreach($hidden as $name=>$value)if($value!==''&&$value!==null)echo '<input type="hidden" name="'.e((string)$name).'" value="'.e((string)$value).'">';
+    echo '<label class="sr-only" for="directory-search">'.e($placeholder).'</label><input id="directory-search" type="search" name="q" value="'.e($search).'" placeholder="'.e($placeholder).'">';
+    echo '<button class="primary-btn" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Search</button><a class="reset-btn" href="'.e($resetUrl).'"><i class="fa-solid fa-rotate-left"></i> Reset</a></form>';
 }

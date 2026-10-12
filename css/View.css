@@ -134,6 +134,7 @@ body{
     
     color: orange;
 }
+.visit-places{margin:26px 8% 24px}.visit-places h4{margin:0 0 12px;color:#fff;font-size:1.05rem;letter-spacing:0}.visit-places>div{display:flex;flex-wrap:wrap;gap:9px}.visit-places span{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid rgba(83,213,200,.55);border-radius:5px;background:rgba(6,113,105,.22);color:#fff;font-size:.86rem;font-style:normal;line-height:1.25}.visit-places i{color:#53d5c8}@media(max-width:700px){.visit-places{margin-inline:0}.visit-places span{max-width:100%}}
 
       .form-info{
         font-size: 16px;
@@ -209,3 +210,5 @@ body{
       }
 
   }
+.view-back{display:inline-flex;align-items:center;gap:8px;margin:0 0 18px;padding:9px 12px;border:1px solid var(--border,#ccd8da);border-radius:6px;color:var(--brand,#0d8d82);font-weight:800;text-decoration:none}.view-offer{margin:18px 0;padding:15px;border:1px solid #e5bd73;border-radius:7px;background:#fff5df;color:#50370b}.view-offer span,.view-offer strong,.view-offer small{display:block}.view-offer span{color:#8b5700;font-size:.75rem;font-weight:800;text-transform:uppercase}.view-offer strong{margin-top:5px}.view-offer p{margin:9px 0 5px}.view-offer p b{margin-left:6px;color:#087f73;font-size:1.1rem}.view-offer small{line-height:1.45}.view-offer a{display:inline-block;margin-top:9px;color:#087f73;font-weight:800}
+.view-form .description .visit-places{margin:26px 0 24px}.view-form .description .visit-places h4{margin:0 0 12px;color:#10272b;font-family:inherit;font-size:1rem;letter-spacing:0}.view-form .description .visit-places>div{display:flex;flex-wrap:wrap;gap:9px}.view-form .description .visit-places span{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #9ddbd4;border-radius:5px;background:#e8f6f4;color:#12665f;font-size:.86rem;font-style:normal;line-height:1.25}.view-form .description .visit-places i{color:#078d82}

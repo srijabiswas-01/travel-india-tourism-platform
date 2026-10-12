@@ -33,18 +33,17 @@ try{
     $insert->execute();
 
     if($outcome==='success'){
-        $update=$db->prepare("UPDATE bookings SET payment_status='paid',status='in_progress',admin_note=CASE WHEN admin_note IS NOT NULL AND LOWER(admin_note) REGEXP 'pay|payment|amount' THEN 'Payment received in full.' ELSE admin_note END WHERE id=? AND user_email=? AND status='confirmed' AND payment_status NOT IN ('paid','refund_pending','refunded')");
+        $update=$db->prepare("UPDATE bookings SET payment_status='paid',admin_note=CASE WHEN admin_note IS NOT NULL AND LOWER(admin_note) REGEXP 'pay|payment|amount' THEN 'Payment received in full.' ELSE admin_note END WHERE id=? AND user_email=? AND status='confirmed' AND payment_status NOT IN ('paid','refund_pending','refunded')");
         if(!$update)throw new RuntimeException('Payment could not be recorded.');
         $update->bind_param('is',$bookingId,$email);
         $update->execute();
         if($update->affected_rows!==1)throw new RuntimeException('Payment could not be recorded.');
-        $historyNote='Payment '.$reference.' succeeded; booking moved to in progress.';$changedBy='payment:'.$reference;$history=$db->prepare('INSERT INTO booking_status_history(booking_id,old_status,new_status,note,changed_by) VALUES(?,?,?,?,?)');$oldStatus='confirmed';$newStatus='in_progress';$history->bind_param('issss',$bookingId,$oldStatus,$newStatus,$historyNote,$changedBy);$history->execute();
+        $historyNote='Payment '.$reference.' succeeded; booking remains confirmed until travel starts.';$changedBy='payment:'.$reference;$history=$db->prepare('INSERT INTO booking_status_history(booking_id,old_status,new_status,note,changed_by) VALUES(?,?,?,?,?)');$oldStatus='confirmed';$newStatus='confirmed';$history->bind_param('issss',$bookingId,$oldStatus,$newStatus,$historyNote,$changedBy);$history->execute();
         if(!empty($booking['offer_id'])&&(float)$booking['discount_amount']>0){$packageBase=max(0,(float)$booking['base_amount']-(float)$booking['hotel_surcharge_total']);$db->execute_query('INSERT IGNORE INTO offer_redemptions(offer_id,booking_id,user_email,base_amount,discount_amount,final_amount) VALUES(?,?,?,?,?,?)',[(int)$booking['offer_id'],$bookingId,$email,$packageBase,(float)$booking['discount_amount'],(float)$booking['total_amount']]);}
         $title='Payment recorded';
         $message='Payment reference '.$reference.' was marked successful for booking '.($booking['booking_reference']?:'#'.$bookingId).'. No money was charged.';
         $type='success';
         $flash='Payment succeeded. No money was charged.';
-        create_notification($db,'Booking in progress','Your confirmed booking is now in progress after payment was recorded.','user',$email,'my-bookings.php#booking-'.$bookingId,'success');
     }elseif($outcome==='failure'){
         $title='Payment failed';
         $message='Payment attempt '.$reference.' failed. No money was charged; you can retry.';

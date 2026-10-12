@@ -60,13 +60,23 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelLink.innerHTML = '<i class="fa-solid fa-ban" aria-hidden="true"></i> Request cancellation';
         actions.append(cancelLink);
       }
-      if (isBeforePayment && ['pending', 'needs_information', 'confirmed', 'rejected'].includes(booking.status)) {
+      if (isBeforePayment && ['pending', 'needs_information', 'confirmed'].includes(booking.status)) {
         const deleteForm = document.createElement('form');
         deleteForm.method = 'post';
         deleteForm.action = 'booking-delete.php';
         deleteForm.onsubmit = () => confirm('Delete this unpaid booking? This removes the request and releases any reserved offer usage.');
         deleteForm.innerHTML = `<input type="hidden" name="csrf_token" value="${booking.csrf || ''}"><input type="hidden" name="booking_id" value="${booking.id}"><button class="portal-button danger-button" type="submit"><i class="fa-solid fa-trash" aria-hidden="true"></i> Delete booking</button>`;
         actions.append(deleteForm);
+      }
+      const settledCancellation = booking.status === 'cancelled' && (['unpaid', 'refunded'].includes(booking.payment_status) || (booking.payment_status === 'paid' && booking.cancellation_status === 'approved'));
+      const removableRejection = booking.status === 'rejected' && booking.payment_status === 'unpaid';
+      if (settledCancellation || removableRejection) {
+        const removeForm = document.createElement('form');
+        removeForm.method = 'post';
+        removeForm.action = 'booking-hide.php';
+        removeForm.onsubmit = () => confirm('Delete this booking from My Trips? Its administrative and payment history will still be retained by Travel India.');
+        removeForm.innerHTML = `<input type="hidden" name="csrf_token" value="${booking.csrf || ''}"><input type="hidden" name="booking_id" value="${booking.id}"><button class="portal-button danger-button" type="submit"><i class="fa-solid fa-trash" aria-hidden="true"></i> Delete from My Trips</button>`;
+        actions.append(removeForm);
       }
       const activeRequest = activeRequestStatuses.includes(booking.cancellation_status) ? 'Cancellation under review' : (activeRequestStatuses.includes(booking.amendment_status) ? 'Date change under review' : '');
       if (activeRequest) {

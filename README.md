@@ -153,7 +153,7 @@ Checkout requires a confirmed booking. The page offers UPI, card, and net-bankin
 - Cardholder, card number, expiry, CVV, UPI ID, and bank selection controls are client-only. They have no submitted field names, are cleared before the request, and are not stored.
 - Only the booking ID, selected method, CSRF token, and selected practice outcome reach the server.
 - The server locks and verifies the signed-in customer's confirmed booking, writes a payment-attempt record, and updates the booking only on a successful selected outcome.
-- A successful outcome marks the payment `paid`, moves the booking to `in_progress`, writes status history, and notifies the customer. Failure/cancellation are recorded as attempts and leave the booking eligible for retry.
+- A successful outcome marks the payment `paid`, keeps the booking `confirmed` until travel starts, writes status history, and notifies the customer. Failure/cancellation are recorded as attempts and leave the booking eligible for retry.
 - The `payments` table stores the attempt amount, method, reference, status, and timestamp. The `bookings.payment_status` stores the current overall booking payment state.
 - Paid customers can view an owner-protected invoice from My Trips. The invoice includes customer, booking, trip, traveller, itemized price, payment method/reference details, and a print/Save as PDF control. Admins can view/print the invoice from booking details.
 
@@ -170,7 +170,7 @@ Sign in at `/admin/login.php`. The first administrator is created at `/admin/set
 | `booking_admin` | Dashboard, bookings, messages, customer viewing |
 | `package_admin` | Dashboard and catalogue |
 
-The Bookings module supports status filtering, status/payment updates, customer-update messages, and an eye-icon detail view. Status updates follow a transition map; notes are required for needs-information, cancellation, and rejection. If an admin marks a confirmed booking as paid, it is moved to `in_progress` and both changes are recorded in history.
+The Bookings module supports status filtering, status/payment updates, customer-update messages, and an eye-icon detail view. Status updates follow a transition map; notes are required for needs-information, cancellation, and rejection. Payment and booking status remain separate: a paid booking stays `confirmed` until its start date, when an administrator can move it to `in_progress`.
 
 The detail page shows package/trip data, saved travellers, customer update/status history, payment attempts, and an invoice panel when paid. Admin updates and sensitive actions are written to `audit_logs`.
 
@@ -211,6 +211,7 @@ Run the migration and automated workflow checks from the project root:
 php db/migrate.php
 php tests/booking-workflow-smoke.php
 php tests/data-integrity-audit.php
+php tests/reporting-smoke.php
 ```
 
 Validate every PHP and JavaScript file:

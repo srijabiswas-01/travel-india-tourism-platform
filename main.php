@@ -2,8 +2,25 @@
 require_once 'app_bootstrap.php';
 require_once 'db.php';
 require_once 'security.php';
+require_once 'offers.php';
 $states = [];
+$homeOffers = [];
 try { $db=db_connect(); $result=$db->query("SELECT * FROM states WHERE status='active' ORDER BY name"); while($row=$result->fetch_assoc())$states[]=$row; } catch(Throwable $error) {}
+try {
+    $db ??= db_connect();
+    $offerResult = $db->query("SELECT o.*,
+        (SELECT COUNT(DISTINCT op_count.package_id) FROM offer_packages op_count JOIN packages p_count ON p_count.id=op_count.package_id AND p_count.status='published' WHERE op_count.offer_id=o.id) package_count,
+        (SELECT p_image.id FROM offer_packages op_image JOIN packages p_image ON p_image.id=op_image.package_id AND p_image.status='published' WHERE op_image.offer_id=o.id ORDER BY p_image.name LIMIT 1) package_id,
+        COALESCE(NULLIF(o.image,''),(SELECT p_image.image FROM offer_packages op_image JOIN packages p_image ON p_image.id=op_image.package_id AND p_image.status='published' WHERE op_image.offer_id=o.id ORDER BY p_image.name LIMIT 1)) display_image
+        FROM offers o
+        WHERE o.status='active' AND o.booking_end_at>=NOW()
+        AND EXISTS (SELECT 1 FROM offer_packages op_live JOIN packages p_live ON p_live.id=op_live.package_id AND p_live.status='published' WHERE op_live.offer_id=o.id)
+        AND (o.usage_limit IS NULL OR (SELECT COUNT(*) FROM offer_redemptions r JOIN bookings b ON b.id=r.booking_id WHERE r.offer_id=o.id AND b.status NOT IN ('cancelled','rejected'))<o.usage_limit)
+        ORDER BY CASE WHEN o.booking_start_at<=NOW() THEN 0 ELSE 1 END,
+        CASE WHEN o.booking_start_at<=NOW() THEN o.booking_end_at ELSE o.booking_start_at END,
+        o.is_featured DESC,o.priority DESC LIMIT 3");
+    while ($offerResult && $offer = $offerResult->fetch_assoc()) $homeOffers[] = $offer;
+} catch (Throwable $error) {}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,6 +39,19 @@ try { $db=db_connect(); $result=$db->query("SELECT * FROM states WHERE status='a
     <video autoplay loop class="back-vedio" muted playsinline><source src="media/bgvedio.mp4" type="video/mp4"></video>
     <div class="content"><h1>TRAVEL INDIA</h1></div>
 </div>
+<?php if ($homeOffers): ?>
+<section class="home-offers" aria-labelledby="home-offers-title">
+    <div class="home-offers-head"><div><span>Limited-time journeys</span><h2 id="home-offers-title">Special Offers</h2></div><a href="offers.php">View all offers <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></div>
+    <div class="home-offers-list">
+    <?php foreach ($homeOffers as $offer): $isOngoing=strtotime($offer['booking_start_at'])<=time(); $offerUrl='offers.php?offer_id='.(int)$offer['id']; ?>
+        <a class="home-offer-card" href="<?php echo e($offerUrl); ?>" aria-label="View offer: <?php echo e($offer['public_heading']); ?>">
+            <img src="<?php echo e($offer['display_image']); ?>" alt="<?php echo e($offer['public_heading']); ?>">
+            <div class="home-offer-copy"><div class="home-offer-meta"><span class="home-offer-status <?php echo $isOngoing?'is-ongoing':'is-upcoming'; ?>"><?php echo $isOngoing?'Ongoing':'Upcoming'; ?></span><strong><?php echo e(offer_label($offer)); ?></strong></div><h3><?php echo e($offer['public_heading']); ?></h3><p><i class="fa-solid fa-suitcase-rolling" aria-hidden="true"></i> <?php echo (int)$offer['package_count']; ?> eligible package<?php echo (int)$offer['package_count']===1?'':'s'; ?></p><div class="home-offer-action"><span><i class="fa-regular fa-calendar" aria-hidden="true"></i> <?php echo $isOngoing?'Ends '.e(date('d M',strtotime($offer['booking_end_at']))):'Starts '.e(date('d M',strtotime($offer['booking_start_at']))); ?></span><strong>View offer <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></strong></div></div>
+        </a>
+    <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
 <div class="space"></div>
 <div class="heading"><h1>... TRAVEL INDIA PACKAGES ...</h1></div>
 <main>

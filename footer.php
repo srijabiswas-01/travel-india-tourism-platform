@@ -5,7 +5,7 @@
       <p>Discover thoughtfully planned journeys, trusted stays, and memorable destinations across India.</p>
       <div class="footer-contact">
         <a href="tel:+913324567890"><i class="fa-solid fa-phone" aria-hidden="true"></i><span>+91 033 2456 7890</span></a>
-        <a href="mailto:TravelIndia@gmail.com"><i class="fa-solid fa-envelope" aria-hidden="true"></i><span>TravelIndia@gmail.com</span></a>
+        <a href="mailto:travelindia@gmail.com"><i class="fa-solid fa-envelope" aria-hidden="true"></i><span>travelindia@gmail.com</span></a>
       </div>
     </section>
 
@@ -19,7 +19,7 @@
     <nav class="footer-column" aria-label="Customer support">
       <h2>Support</h2>
       <ul class="footer-nav-list">
-        <li><a href="contactus.php">Contact us</a></li><li><a href="booking.php">Plan a trip</a></li><li><a href="Package.php">Find a destination</a></li>
+        <li><a href="contactus.php">Contact us</a></li><li><a href="booking.php">Plan a trip</a></li><li><a href="Package.php">Find a destination</a></li><li><a href="policies.php">Cancellation policy</a></li>
       </ul>
     </nav>
 

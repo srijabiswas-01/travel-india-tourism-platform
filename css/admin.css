@@ -95,6 +95,8 @@
 .admin-user a[aria-label="Admin profile"]{color:var(--brand)}
 .request-review-list{display:grid;gap:14px}.request-review-list article{padding:16px;border:1px solid var(--line);border-radius:7px;background:var(--page)}.request-review-list h3{margin:12px 0 7px}.request-review-list p{color:var(--muted);line-height:1.55}.request-review-form{display:grid;grid-template-columns:minmax(180px,1fr) auto auto;align-items:end;gap:9px;margin-top:14px}.request-review-form label{display:grid;gap:6px;color:var(--muted);font-size:.8rem;font-weight:700}.request-review-form input,.request-review-form textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:5px;background:var(--admin-field-bg);color:var(--ink)}.request-review-form textarea{grid-column:1/-1;min-height:72px;resize:vertical}@media(max-width:760px){.request-review-form{grid-template-columns:1fr}.request-review-form textarea{grid-column:auto}.request-review-form button{width:100%}}
 .admin-form input[type="checkbox"],.inline-workflow input[type="checkbox"],.message-card input[type="checkbox"],.offer-packages input[type="checkbox"]{width:16px!important;height:16px!important;min-width:16px;min-height:16px;margin:0;padding:0;accent-color:var(--brand)}
+.workflow-review{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.72rem;font-weight:700}.inline-workflow.is-read-only{grid-template-columns:130px 110px minmax(150px,1fr)}.inline-workflow.is-read-only button{display:none}.inline-workflow select:disabled,.inline-workflow textarea:disabled{opacity:.72;cursor:not-allowed}
+.booking-filter-bar{display:grid;grid-template-columns:minmax(240px,1.5fr) repeat(3,minmax(150px,1fr)) auto auto;gap:9px;margin:-8px 0 20px}.booking-filter-bar input,.booking-filter-bar select{min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:5px;background:var(--admin-field-bg);color:var(--ink)}.request-alert,.workflow-warning{display:flex;align-items:center;gap:6px;margin-bottom:7px;color:var(--accent);font-size:.72rem;font-weight:800}.workflow-warning{margin:7px 0 0;font-style:normal}.request-alert:hover{text-decoration:underline}@media(max-width:1100px){.booking-filter-bar{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.booking-filter-bar{grid-template-columns:1fr}.booking-filter-bar .primary-btn,.booking-filter-bar .reset-btn{width:100%;justify-content:center}}
 
 /* Stable admin shell. Keep these final rules isolated from page-level components. */
 html{min-width:320px;background:var(--page)}body{min-width:320px;overflow-x:hidden}
@@ -107,3 +109,26 @@ html{min-width:320px;background:var(--page)}body{min-width:320px;overflow-x:hidd
 .admin-form>*{min-width:0}.admin-form input,.admin-form select,.admin-form textarea{max-width:100%}img{max-width:100%}
 @media(max-width:760px){.admin-top{height:64px;padding-inline:12px}.admin-brand img{width:42px;height:42px}.admin-brand span{font-size:.9rem}.admin-user{gap:6px}.admin-user>a,.admin-user>button,.admin-menu{width:36px;height:36px;flex-basis:36px}.admin-layout{min-height:calc(100vh - 64px)}.admin-sidebar{top:64px;height:calc(100vh - 64px);box-shadow:12px 0 32px rgba(0,0,0,.2)}.admin-content{padding:20px 14px}.page-head h1{font-size:1.65rem}}
 @media(max-width:430px){.admin-brand small{display:none}.admin-notification-menu{display:none}}
+.directory-tools{margin-left:auto}.panel-head:has(.directory-tools){gap:16px;flex-wrap:wrap}.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}@media(max-width:760px){.directory-tools{width:100%;margin-left:0}}
+
+/* Bookings register: keep review controls readable without widening the page. */
+body:has(.inline-workflow) .panel{overflow:hidden}
+body:has(.inline-workflow) .table-wrap table{min-width:980px;table-layout:fixed}
+body:has(.inline-workflow) th:nth-child(1){width:20%}
+body:has(.inline-workflow) th:nth-child(2){width:18%}
+body:has(.inline-workflow) th:nth-child(3){width:12%}
+body:has(.inline-workflow) th:nth-child(4){width:12%}
+body:has(.inline-workflow) th:nth-child(5){width:38%}
+body:has(.inline-workflow) td{white-space:normal;vertical-align:top;overflow-wrap:anywhere}
+.inline-workflow{width:100%;display:grid;grid-template-columns:minmax(130px,1fr) minmax(130px,1fr);align-items:center;gap:8px}
+.inline-workflow select,.inline-workflow textarea{min-width:0}
+.inline-workflow select[name="status"]{grid-column:1}
+.inline-workflow .workflow-review{grid-column:2;min-height:42px;padding:0 10px;border:1px solid var(--line);border-radius:5px;background:var(--page)}.inline-workflow .workflow-review[hidden]{display:none!important}
+.inline-workflow select[name="payment_status"]{grid-column:2}
+.inline-workflow .workflow-review:not([hidden])+select[name="payment_status"]{grid-column:1/-1}
+.inline-workflow textarea{grid-column:1/-1;min-height:58px}
+.inline-workflow>button{grid-column:1/-1;justify-self:end;width:92px;min-height:34px}.inline-workflow .workflow-help{grid-column:1/-1;margin:0;color:var(--muted);font-size:.7rem;line-height:1.4}
+.inline-workflow.is-read-only{grid-template-columns:1fr 1fr}.inline-workflow.is-read-only textarea{display:none}.inline-workflow.is-read-only select{opacity:.78}
+.booking-filter-bar{grid-template-columns:minmax(260px,1.5fr) repeat(3,minmax(170px,1fr)) auto auto}
+@media(max-width:1180px){.booking-filter-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-filter-bar .primary-btn,.booking-filter-bar .reset-btn{width:100%;justify-content:center}}
+@media(max-width:760px){body:has(.inline-workflow) .table-wrap table{min-width:900px}.inline-workflow{grid-template-columns:1fr}.inline-workflow select[name="status"],.inline-workflow .workflow-review,.inline-workflow select[name="payment_status"],.inline-workflow .workflow-review:not([hidden])+select[name="payment_status"],.inline-workflow textarea,.inline-workflow>button{grid-column:1}.inline-workflow>button{width:100%}}
