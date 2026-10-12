@@ -11,6 +11,7 @@ try {
     $offerResult = $db->query("SELECT o.*,
         (SELECT COUNT(DISTINCT op_count.package_id) FROM offer_packages op_count JOIN packages p_count ON p_count.id=op_count.package_id AND p_count.status='published' WHERE op_count.offer_id=o.id) package_count,
         (SELECT p_image.id FROM offer_packages op_image JOIN packages p_image ON p_image.id=op_image.package_id AND p_image.status='published' WHERE op_image.offer_id=o.id ORDER BY p_image.name LIMIT 1) package_id,
+        (SELECT p_background.image FROM offer_packages op_background JOIN packages p_background ON p_background.id=op_background.package_id AND p_background.status='published' WHERE op_background.offer_id=o.id AND p_background.image IS NOT NULL AND p_background.image<>'' ORDER BY p_background.name LIMIT 1) background_image,
         COALESCE(NULLIF(o.image,''),(SELECT p_image.image FROM offer_packages op_image JOIN packages p_image ON p_image.id=op_image.package_id AND p_image.status='published' WHERE op_image.offer_id=o.id ORDER BY p_image.name LIMIT 1)) display_image
         FROM offers o
         WHERE o.status='active' AND o.booking_end_at>=NOW()
@@ -32,6 +33,7 @@ try {
     <link rel="icon" href="img/favicon.jpg?v=1" type="image/jpeg">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/sample.css">
+    <link rel="stylesheet" href="css/home-offers.css?v=11">
 </head>
 <body>
 <?php include 'header.php'; ?>
@@ -39,22 +41,9 @@ try {
     <video autoplay loop class="back-vedio" muted playsinline><source src="media/bgvedio.mp4" type="video/mp4"></video>
     <div class="content"><h1>TRAVEL INDIA</h1></div>
 </div>
-<?php if ($homeOffers): ?>
-<section class="home-offers" aria-labelledby="home-offers-title">
-    <div class="home-offers-head"><div><span>Limited-time journeys</span><h2 id="home-offers-title">Special Offers</h2></div><a href="offers.php">View all offers <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></div>
-    <div class="home-offers-list">
-    <?php foreach ($homeOffers as $offer): $isOngoing=strtotime($offer['booking_start_at'])<=time(); $offerUrl='offers.php?offer_id='.(int)$offer['id']; ?>
-        <a class="home-offer-card" href="<?php echo e($offerUrl); ?>" aria-label="View offer: <?php echo e($offer['public_heading']); ?>">
-            <img src="<?php echo e($offer['display_image']); ?>" alt="<?php echo e($offer['public_heading']); ?>">
-            <div class="home-offer-copy"><div class="home-offer-meta"><span class="home-offer-status <?php echo $isOngoing?'is-ongoing':'is-upcoming'; ?>"><?php echo $isOngoing?'Ongoing':'Upcoming'; ?></span><strong><?php echo e(offer_label($offer)); ?></strong></div><h3><?php echo e($offer['public_heading']); ?></h3><p><i class="fa-solid fa-suitcase-rolling" aria-hidden="true"></i> <?php echo (int)$offer['package_count']; ?> eligible package<?php echo (int)$offer['package_count']===1?'':'s'; ?></p><div class="home-offer-action"><span><i class="fa-regular fa-calendar" aria-hidden="true"></i> <?php echo $isOngoing?'Ends '.e(date('d M',strtotime($offer['booking_end_at']))):'Starts '.e(date('d M',strtotime($offer['booking_start_at']))); ?></span><strong>View offer <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></strong></div></div>
-        </a>
-    <?php endforeach; ?>
-    </div>
-</section>
-<?php endif; ?>
 <div class="space"></div>
 <div class="heading"><h1>... TRAVEL INDIA PACKAGES ...</h1></div>
-<main>
+<main class="home-main">
 <?php foreach($states as $state): ?>
 <a href="Package.php?state=<?php echo e($state['slug']); ?>">
     <div class="box">
@@ -64,6 +53,24 @@ try {
 </a>
 <?php endforeach; ?>
 <div class="space"></div>
+<?php if ($homeOffers): ?>
+<section class="home-offers home-offers-simple" aria-labelledby="home-offers-title">
+    <div class="home-offers-head"><div><span>Limited-time journeys</span><h2 id="home-offers-title">Special Offers</h2></div></div>
+    <div class="home-offers-stage">
+        <div class="home-offers-background" style="background-image:url(&quot;img/9.jpg&quot;)" aria-hidden="true"></div>
+        <div class="home-offers-list">
+        <?php foreach ($homeOffers as $offer): $offerUrl='offers.php?offer_id='.(int)$offer['id']; ?>
+            <article class="home-offer-card">
+                <a class="home-offer-image" href="<?php echo e($offerUrl); ?>" aria-label="Get offer: <?php echo e($offer['public_heading']); ?>">
+                    <img src="<?php echo e($offer['display_image']); ?>" alt="<?php echo e($offer['public_heading']); ?>" loading="lazy">
+                </a>
+                <a class="home-offer-button" href="<?php echo e($offerUrl); ?>">Get Offer <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </article>
+        <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
 <div class="service-section">
     <div class="inner-width">
         <h1 class="section-title">Our Services</h1><div class="border"></div>

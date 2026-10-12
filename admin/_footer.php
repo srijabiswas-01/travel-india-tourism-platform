@@ -13,4 +13,4 @@ if(directoryPages.includes(location.pathname.split('/').pop()))document.querySel
 <?php if(basename($_SERVER['PHP_SELF']??'')==='packages.php'&&isset($showForm)&&$showForm):?>
 document.addEventListener('DOMContentLoaded',()=>{const description=document.querySelector('textarea[name="description"]')?.closest('label');if(!description)return;const label=document.createElement('label');label.className='wide';label.innerHTML='Places to visit <small>Enter 5 to 7 unique places separated by commas.</small><textarea name="visit_places" required placeholder="Place one, Place two, Place three, Place four, Place five"></textarea>';label.querySelector('textarea').value=<?php echo json_encode((string)($edit['visit_places']??''),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);?>;description.after(label)});
 <?php endif;?>
-</script></body></html>
+</script><script src="../js/admin-table-pagination.js?v=1"></script></body></html>

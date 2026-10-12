@@ -14,6 +14,7 @@ $pageTitle='Cancellation & Refund Policy';
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cancellation &amp; Refund Policy | Travel India</title>
 <link rel="stylesheet" href="css/policies.css?v=1">
+<link rel="stylesheet" href="css/policies-theme.css?v=1">
 </head>
 <body>
 <?php include 'header.php';?>

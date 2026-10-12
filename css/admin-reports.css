@@ -1,0 +1,25 @@
+.report-grid,.report-grid>*{min-width:0}
+.report-actions{justify-content:flex-end}
+.financial-chart{max-width:100%}
+@media(max-width:760px){
+  .report-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .report-actions>*{width:100%;justify-content:center}
+  .report-grid{display:block}
+  .report-grid .panel{width:100%;max-width:100%;overflow:hidden}
+  .report-wide .table-wrap table{min-width:0}
+  .report-wide .table-wrap thead{display:none}
+  .report-wide .table-wrap tbody,.report-wide .table-wrap tr{display:block}
+  .report-wide .table-wrap tr{padding:10px 0;border-bottom:1px solid var(--line)}
+  .report-wide .table-wrap td{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 14px;border:0;white-space:normal;text-align:right}
+  .report-wide .table-wrap td::before{color:var(--muted);font-size:.7rem;font-weight:800;text-transform:uppercase;text-align:left}
+  .report-wide .table-wrap td:nth-child(1)::before{content:'Period'}
+  .report-wide .table-wrap td:nth-child(2)::before{content:'Bookings'}
+  .report-wide .table-wrap td:nth-child(3)::before{content:'Paid'}
+  .report-wide .table-wrap td:nth-child(4)::before{content:'Collected'}
+  .report-wide .table-wrap td:nth-child(5)::before{content:'Refunded'}
+  .report-wide .table-wrap td:nth-child(6)::before{content:'Net revenue'}
+  .financial-chart{height:210px;padding-inline:12px;gap:10px}
+  .chart-group{min-width:58px}
+  .chart-group span{width:14px}
+}
+@media(max-width:430px){.report-actions{grid-template-columns:1fr}.chart-legend{justify-content:flex-start}}
