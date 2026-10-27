@@ -1,6 +1,8 @@
 # Travel India MIS
 
-Travel India is an academic travel-management information system built with PHP and MySQL. It includes a public travel catalogue, customer profiles and booking requests, and a role-aware administration portal.
+Travel India MIS is an academic travel management information system designed to manage the complete customer journey and operational workflow of a travel business. It brings together public tour information, customer registration, booking requests, invoice tracking, and administrative approvals into one connected system.
+
+This README focuses on the purpose and business logic of the platform rather than implementation details. The goal is to explain what the system is for, how the information flows across customers and administrators, and why such a system is necessary in a real travel organisation.
 
 > **Payment note:** the checkout is a clearly labelled training flow. It records simulated success, failure, and cancellation outcomes, but it does not connect to a payment provider, collect or store card/UPI credentials, or move money.
 
@@ -11,25 +13,92 @@ Travel India is an academic travel-management information system built with PHP 
 
 Admin access requires an authorized administrator account. Do not publish administrator credentials in this README or the GitHub repository.
 
-## Contents
+## Purpose of the system
 
-- [Live portals](#live-portals)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Local installation](#local-installation)
-- [Configuration](#configuration)
-- [Customer workflow](#customer-workflow)
-- [Booking and pricing rules](#booking-and-pricing-rules)
-- [Payment and invoices](#payment-and-invoices)
-- [Admin portal](#admin-portal)
-- [Notifications](#notifications)
-- [Database](#database)
-- [Testing](#testing)
-- [InfinityFree deployment](#infinityfree-deployment)
-- [GitHub guidance](#github-guidance)
-- [Security and limitations](#security-and-limitations)
-- [Verification](#verification)
-- [Project layout](#project-layout)
+The purpose of Travel India MIS is to make travel operations more organised, transparent, and efficient. In a tourism business, customer requests, package availability, room allocations, pricing, and administrative decisions often get scattered across different channels. Without a controlled system, the organisation may face:
+
+- repeated customer queries and duplicate bookings
+- poor tracking of booking stages and approval status
+- inconsistent pricing and unclear payment records
+- delayed communication between customers and staff
+- limited reporting for management decisions
+
+This MIS solves those issues by creating a single source of operational information for customers, admins, and managers.
+
+## Why this project is needed
+
+Travel services depend on accurate, timely information. A tour operator must know:
+
+- which packages are available and active
+- which customers have booked trips and when
+- whether a booking is pending, confirmed, cancelled, or needs more information
+- how pricing is calculated and what has been paid
+- which customer requests require admin attention
+- how business performance is progressing over time
+
+Without an MIS, these activities are handled manually and are vulnerable to errors, delays, and poor visibility. The system is needed to standardise operations, reduce administrative workload, and give management reliable information for planning and control.
+
+## How this MIS works
+
+The system is designed around a simple information flow:
+
+1. A visitor explores the public website and views destinations, packages, and offers.
+2. A customer registers and creates a personal account.
+3. The customer selects a package, enters trip details, and submits a booking request.
+4. The booking is stored with a status such as pending, confirmed, cancelled, or needs information.
+5. Admin staff review and process the request, request more information if needed, or confirm the trip.
+6. Once the trip is confirmed, the system supports payment simulation, invoice generation, and booking updates.
+7. Both customers and admins receive notifications about updates, decisions, and required actions.
+8. Management can use the reporting side of the MIS to review booking trends and operational performance.
+
+In practical terms, the MIS acts as the digital backbone of the travel business. It connects the public-facing website to internal business processes without requiring the team to rely on disconnected spreadsheets, manual messages, or unstructured records.
+
+## Main business areas
+
+The MIS covers the core travel-management processes:
+
+- Public package discovery and promotional information
+- Customer registration and personal profile management
+- Booking requests and trip details
+- Pricing, offers, and invoice totals
+- Customer notifications and admin messages
+- Admin approval and booking decision workflows
+- Package and operational management by staff
+- Reporting and performance monitoring
+
+## Stakeholders
+
+The system is built for multiple user groups:
+
+- Visitors: browse packages and destination information
+- Customers: register, manage accounts, and request trips
+- Booking administrators: review and approve bookings
+- Package administrators: manage travel products and offers
+- Managers: monitor performance and operational trends
+- System administrators: manage user access and system configuration
+
+## What the system manages
+
+The MIS handles the information needed for travel operations, including:
+
+- customer identities and login access
+- destinations and package details
+- booking records and trip dates
+- travellers, pricing components, and discounts
+- payment status and invoice records
+- admin notes and follow-up actions
+- enquiries and messages
+- reports for operational review
+
+## Documentation and project references
+
+This repository contains both the working project and supporting project documentation. For detailed system design and process mapping, see:
+
+- [docs/MIS_STRUCTURE.md](docs/MIS_STRUCTURE.md)
+- [docs/IMPLEMENTATION_CHECKLIST.md](docs/IMPLEMENTATION_CHECKLIST.md)
+- [docs/OFFERS_MIS_AUDIT.md](docs/OFFERS_MIS_AUDIT.md)
+
+The documentation in this repository is intentionally focused on the management information system and its operational purpose, rather than low-level application code.
 
 ## Features
 
